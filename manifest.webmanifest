@@ -4,8 +4,8 @@
   "description": "Детективная игра — расследование через телефон и документы",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#070b14",
+  "theme_color": "#070b14",
   "lang": "ru",
   "icons": [
     {
