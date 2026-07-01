@@ -1,0 +1,21 @@
+---
+description: Проект «Дым над льдом» — детективная настольная игра в документах
+alwaysApply: true
+---
+
+# Дым над льдом
+
+Перед работой над сюжетом, документами или уликами прочитай `CLAUDE.md` и `docs/12_chto_nelzya_menyat.md`.
+
+Установленные subagents в `.cursor/agents/`:
+- `canon-keeper` — проверка канона
+- `scenario-writer` — проектирование расследования
+- `chapter-architect` — структура главы
+- `clue-constructor` — система улик
+- `document-package-builder` — пакет документов
+- `document-generator` — тексты документов
+- `realism-editor` — достоверность
+- `player-document-tester` — тест от лица игрока
+- `investigation-logic-auditor` — логика расследования
+
+Не создавать новый канонический факт без прямой команды автора.

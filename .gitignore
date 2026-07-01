@@ -1,0 +1,42 @@
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+
+# Android (см. android/.gitignore)
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/app/src/main/assets/
+
+# iOS — www синхронизируется скриптом из phone-vanilla/
+ios/build/
+ios/DymNadLdom/www/
+*.xcuserstate
+**/xcuserdata/
+
+# Сборки
+*.apk
+*.aab
+*.ipa
+DymNadLdom-Simulator.app/
+
+# Утилиты (не часть проекта)
+rclone-*
+rclone-current-*.zip
+
+# IDE / локальное
+.idea/
+*.iml
+
+# Временные symlink-сборки
+/tmp/

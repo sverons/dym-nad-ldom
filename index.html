@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#000000">
+  <title>Дым над льдом</title>
+  <meta name="description" content="Детективная игра — расследование через телефон">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <script>
+    if (location.protocol === 'file:') {
+      document.addEventListener('DOMContentLoaded', function () {
+        document.body.innerHTML =
+          '<div style="font-family:system-ui;padding:24px;max-width:520px;margin:40px auto;line-height:1.5;color:#fff;background:#000;min-height:100dvh">' +
+          "<h1 style='font-size:20px;margin-bottom:12px'>Нужен локальный сервер</h1>" +
+          "<p>Запустите в папке проекта:</p>" +
+          "<pre style='background:#111;padding:12px;border-radius:8px;overflow:auto'>./start.sh</pre>" +
+          "<p>Затем откройте <strong>http://localhost:4173/</strong></p></div>";
+      });
+    } else {
+      location.replace('./phone-vanilla/' + location.search + location.hash);
+    }
+  </script>
+</head>
+<body>
+  <p style="font-family:system-ui;color:#fff;background:#000;min-height:100dvh;display:flex;align-items:center;justify-content:center;margin:0">
+  Загрузка телефона…</p>
+</body>
+</html>

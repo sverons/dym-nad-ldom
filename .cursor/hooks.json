@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": ".cursor/hooks/sync-drive.sh"
+      }
+    ],
+    "stop": [
+      {
+        "command": ".cursor/hooks/sync-drive.sh"
+      }
+    ]
+  }
+}

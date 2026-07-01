@@ -1,0 +1,18 @@
+{
+  "name": "Дым над льдом",
+  "short_name": "Дым над льдом",
+  "description": "Детективная игра — расследование через телефон и документы",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

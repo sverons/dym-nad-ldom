@@ -1,0 +1,88 @@
+/* Дополнительные стили поверх Lovable-сборки */
+html,
+body,
+#root {
+  height: 100%;
+  height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  background: #000;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* iOS-стиль иконок приложений */
+.ios-app-icon {
+  border-radius: 22.37%;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.25),
+    0 4px 10px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ios-app-icon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.34) 0%,
+    rgba(255, 255, 255, 0.08) 28%,
+    rgba(255, 255, 255, 0) 52%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ios-app-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ios-app-icon > svg,
+.ios-app-icon > * {
+  position: relative;
+  z-index: 0;
+}
+
+/* Скрыть бейдж Lovable, если появится */
+a[href*="lovable.dev"],
+a[href*="lovable.app"] {
+  display: none !important;
+}
+
+/* Полноэкранный режим на телефонах */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  body {
+    padding: 0;
+  }
+
+  .min-h-screen.flex.items-center.justify-center {
+    min-height: 100dvh !important;
+    padding: 0 !important;
+    align-items: stretch !important;
+  }
+
+  .min-h-screen.flex.items-center.justify-center > .relative.w-\[375px\] {
+    width: 100% !important;
+    height: 100dvh !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .min-h-screen.flex.items-center.justify-center > .relative.w-\[375px\] > .absolute.top-\[10px\] {
+    display: none !important;
+  }
+}

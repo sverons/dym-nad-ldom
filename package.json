@@ -1,0 +1,12 @@
+{
+  "name": "dym-nad-ldom",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Детективная игра «Дым над льдом» — браузерное приложение",
+  "scripts": {
+    "start": "python3 serve.py",
+    "phone": "python3 serve.py",
+    "android:sync": "bash scripts/sync-android-www.sh",
+    "android:build": "bash build-apk.sh"
+  }
+}
