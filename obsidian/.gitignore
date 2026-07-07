@@ -1,0 +1,10 @@
+# Obsidian
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/workspaces.json
+.obsidian/hotkeys.json
+.obsidian/plugins/obsidian-git/data.json.bak
+.trash/
+
+# OS
+.DS_Store
