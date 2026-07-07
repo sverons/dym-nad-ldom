@@ -15,8 +15,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PREFIX="obsidian"
 REMOTE_NAME="obsidian"
 REMOTE_URL="${OBSIDIAN_GITHUB_URL:-https://github.com/sverons/Obsidian_Dym.git}"
-BRANCH="${OBSIDIAN_GITHUB_BRANCH:-main}"
-GH="${GH_BIN:-gh}"
+GIT_BRANCH="${OBSIDIAN_GITHUB_BRANCH:-main}"
+GH="${GH_BIN:-/tmp/gh-install/gh_2.69.0_macOS_arm64/bin/gh}"
 
 ensure_remote() {
   if git -C "$ROOT" remote get-url "$REMOTE_NAME" &>/dev/null; then
@@ -75,8 +75,8 @@ push_obsidian() {
       commit -m "obsidian: sync $(date '+%Y-%m-%d %H:%M')"
   fi
 
-  echo "→ Subtree push → $REMOTE_NAME/$BRANCH…"
-  git -C "$ROOT" subtree push --prefix="$PREFIX" "$REMOTE_NAME" "$BRANCH"
+  echo "-> Subtree push -> ${REMOTE_NAME}/${GIT_BRANCH}"
+  git -C "$ROOT" subtree push --prefix="$PREFIX" "$REMOTE_NAME" "$GIT_BRANCH"
   echo "✓ Готово: $REMOTE_URL"
 }
 
@@ -84,8 +84,8 @@ pull_obsidian() {
   init_sync
   check_git_auth
 
-  echo "→ Subtree pull ← $REMOTE_NAME/$BRANCH…"
-  git -C "$ROOT" subtree pull --prefix="$PREFIX" "$REMOTE_NAME" "$BRANCH" --squash -m "obsidian: pull $(date '+%Y-%m-%d %H:%M')"
+  echo "-> Subtree pull <- ${REMOTE_NAME}/${GIT_BRANCH}"
+  git -C "$ROOT" subtree pull --prefix="$PREFIX" "$REMOTE_NAME" "$GIT_BRANCH" --squash -m "obsidian: pull $(date '+%Y-%m-%d %H:%M')"
   echo "✓ obsidian/ обновлён"
 }
 
