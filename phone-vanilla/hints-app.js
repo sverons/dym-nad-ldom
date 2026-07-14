@@ -53,13 +53,16 @@
     const ctx = [];
     const notes = (PhoneSession?.notes || []).map(n => `${n.title} ${n.body}`).join(' ');
     const emails = (PhoneSession?.emails || []).map(e => `${e.subject} ${e.body}`).join(' ');
-    if (/вероник|е321|polo/i.test(notes)) {
+    if (/вероник|е907|granta/i.test(notes)) {
       ctx.push('veronika-note');
     }
-    if (/kapnos|капнос|строител/i.test(notes)) {
+    if (/жанн|к558|logan/i.test(notes)) {
+      ctx.push('zhanna-note');
+    }
+    if (/kapnos|капнос|строител|лесная/i.test(notes)) {
       ctx.push('kapnos-note');
     }
-    if (/bmw|а123|мерседес/i.test(notes)) {
+    if (/passat|а316|santa|м042/i.test(notes)) {
       ctx.push('cars-note');
     }
     if (/kapnos|mia|морозов/i.test(emails)) {
@@ -72,7 +75,10 @@
     const extras = [];
 
     if (topicId === 'veronika' && context.includes('veronika-note') && chapter === 1) {
-      extras.push('В заметках уже есть номер Polo — проверьте его в ГИБДД.');
+      extras.push('В заметках есть Granta Прониной — проверьте номер Е907ВА 152 в ГИБДД.');
+    }
+    if (topicId === 'jeanne' && context.includes('zhanna-note') && chapter === 1) {
+      extras.push('Logan Жанны (К558ЕН 152) и алиби через такси — сверьте с показаниями Назарова.');
     }
     if (topicId === 'next' && context.includes('veronika-note') && chapter === 1) {
       extras.push('Вы уже близко к линии Вероники — сверьте заметки с базой авто.');

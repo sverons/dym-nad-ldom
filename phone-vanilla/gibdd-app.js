@@ -43,6 +43,7 @@
           ${row('№ двигателя', car.engineNumber, true)}
           ${row('Объём (см³)', car.engineVolume)}
           ${row('Мощность', car.power)}
+          ${car.ptsNumber ? row('ПТС', car.ptsNumber, true) : ''}
         </div>
       </div>
       <div class="gibdd-card">
@@ -83,7 +84,7 @@
       <div class="gibdd-empty">
         <div class="gibdd-empty-icon">🚗</div>
         <p>Введите госномер</p>
-        <small>Формат: А123БВ777</small>
+        <small>Формат: А316СК 152</small>
       </div>
     `;
 
@@ -236,6 +237,7 @@
           ${field('engineNumber', 'Номер двигателя', adminForm.engineNumber)}
           ${field('engineVolume', 'Объём двигателя (см³)', adminForm.engineVolume, 'number')}
           ${field('power', 'Мощность (кВт/л.с.)', adminForm.power)}
+          ${field('ptsNumber', 'ПТС', adminForm.ptsNumber)}
           ${field('accidents', 'Сведения о ДТП', adminForm.accidents, 'textarea')}
           <p class="gibdd-form-section">Владелец</p>
           ${field('ownerName', 'ФИО', adminForm.ownerName)}
@@ -323,6 +325,7 @@
         engineNumber: String(data.get('engineNumber') || '').trim(),
         engineVolume: Number(data.get('engineVolume') || 0),
         power: String(data.get('power') || '').trim(),
+        ptsNumber: String(data.get('ptsNumber') || '').trim(),
         accidents: String(data.get('accidents') || '').trim(),
         ownerName: String(data.get('ownerName') || '').trim(),
         ownerBirthDate: String(data.get('ownerBirthDate') || ''),

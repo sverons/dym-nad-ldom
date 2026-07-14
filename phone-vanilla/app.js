@@ -34,7 +34,9 @@ function updateTime() {
 
   const lockDate = document.getElementById('lockDate');
   if (lockDate) {
-    lockDate.textContent = now.toLocaleDateString('ru-RU', {
+    // Неизменная дата сюжета — 21 февраля
+    const lockDay = new Date(2026, 1, 21);
+    lockDate.textContent = lockDay.toLocaleDateString('ru-RU', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',

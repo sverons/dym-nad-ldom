@@ -17,7 +17,11 @@ const MAP_PLACES = [
   { id: 'lake-lebedinoye', name: 'Озеро Лебединое', type: 'lake', x: 78, y: 18 },
   { id: 'lake-lesnoye', name: 'Озеро Лесное', type: 'lake', x: 82, y: 62 },
   { id: 'lake-sosnovoye', name: 'Озеро Сосновое', type: 'lake', x: 85, y: 82 },
-  { id: 'stroyitely', name: 'ул. Строителей, 9', type: 'poi', sub: 'Подземная парковка', x: 36, y: 74 },
+  { id: 'stroyitely', name: 'ул. Строителей, 9', type: 'poi', sub: 'Клиника ProЗрение', x: 36, y: 74 },
+  { id: 'lesnaya-7', name: 'ул. Лесная, 7', type: 'poi', sub: 'Морозов А.С.', x: 40, y: 68 },
+  { id: 'sadovaya-18', name: 'ул. Садовая, 18', type: 'poi', sub: 'Крылов Д.В.', x: 44, y: 66 },
+  { id: 'prozrenie', name: 'Клиника ProЗрение', type: 'poi', sub: 'Иванов, Иванова', x: 36, y: 74 },
+  { id: 'staroe-ozero', name: 'Старое Озеро', type: 'lake', sub: 'Авария 2009', x: 58, y: 52 },
 ];
 
 /** Рёбра дорог: [от, до, км] */
@@ -44,6 +48,10 @@ const MAP_ROADS = [
   ['lugovoe', 'vyazma', 9],
   ['lugovoe', 'stroyitely', 5],
   ['zarechye', 'stroyitely', 6],
+  ['lesnaya-7', 'lugovoe', 4],
+  ['lesnaya-7', 'sadovaya-18', 3],
+  ['sadovaya-18', 'stroyitely', 5],
+  ['prozrenie', 'stroyitely', 0],
 ];
 
 /** Географическая привязка района Новограда (вымышленные координаты) */

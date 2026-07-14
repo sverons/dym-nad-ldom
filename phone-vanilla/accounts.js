@@ -29,8 +29,8 @@ const PHONE_ACCOUNTS = {
     label: 'Основная',
     passcode: '128500',
     adminPasscode: '000000',
-    gibddStorageKey: 'dym_gibdd_cars_main_v2',
-    dataStorageKey: 'dym_phone_data_main_v2',
+    gibddStorageKey: 'dym_gibdd_cars_main_v4',
+    dataStorageKey: 'dym_phone_data_main_v4',
     apps: [
       { app: 'mail', label: 'Почта', icon: 'mail', style: 'app-mail' },
       { app: 'calls', label: 'Телефон', icon: 'dialer', style: 'app-dialer' },
@@ -46,54 +46,7 @@ const PHONE_ACCOUNTS = {
       { app: 'gibdd-admin', label: 'ГИБДД+', icon: 'gibdd', style: 'app-gibdd-admin', adminOnly: true },
       { app: 'admin', label: 'Админ', icon: 'admin', style: 'app-admin', adminOnly: true },
     ],
-    defaultData: {
-      contacts: [
-        { id: 1, name: 'Алексей', avatar: 'А', color: 'avatar-1', phone: '+7 (999) 123-45-67' },
-        { id: 2, name: 'Мария', avatar: 'М', color: 'avatar-2', phone: '+7 (999) 234-56-78' },
-        { id: 3, name: 'Дмитрий', avatar: 'Д', color: 'avatar-3', phone: '+7 (999) 345-67-89' },
-        { id: 4, name: 'Елена', avatar: 'Е', color: 'avatar-4', phone: '+7 (999) 456-78-90' },
-        { id: 5, name: 'Сергей', avatar: 'С', color: 'avatar-5', phone: '+7 (999) 567-89-01' },
-      ],
-      chats: [
-        { contactId: 1, messages: [
-          { text: 'Привет! Ты видел новости?', sent: false, time: '10:30' },
-          { text: 'Какие именно?', sent: true, time: '10:31' },
-          { text: 'Про запуск ракеты сегодня утром', sent: false, time: '10:32' },
-        ], unread: true },
-        { contactId: 2, messages: [
-          { text: 'Встречаемся в 18:00?', sent: false, time: 'Вчера' },
-          { text: 'Конечно, буду!', sent: true, time: 'Вчера' },
-        ], unread: false },
-        { contactId: 5, messages: [
-          { text: 'Нужно поговорить сегодня вечером', sent: false, time: '09:15' },
-        ], unread: true },
-      ],
-      emails: [
-        { id: 1, from: 'Apple', email: 'noreply@apple.com', subject: 'Ваш чек от Apple', preview: 'Спасибо за покупку...', time: '12:30', unread: true, body: 'Спасибо за покупку в App Store.\n\nСумма: 299 ₽', color: 'avatar-1' },
-        { id: 2, from: 'Дмитрий', email: 'dmitry@work.ru', subject: 'Документы для проекта', preview: 'Прикрепляю файлы...', time: '10:15', unread: true, body: 'Привет!\n\nПрикрепляю файлы по проекту.', color: 'avatar-3' },
-      ],
-      callHistory: [
-        { contactId: 1, type: 'incoming', date: 'Сегодня, 14:32' },
-        { contactId: 5, type: 'missed', date: 'Вчера, 19:45' },
-      ],
-      games: [
-        { id: 'snake', title: 'Змейка', desc: 'Классическая аркада', emoji: '🐍', bg: '#1a472a' },
-        { id: 'match3', title: '3 в ряд', desc: 'Скоро', emoji: '🔮', bg: '#3d1a47', disabled: true },
-        { id: 'tetris', title: 'Тетрис', desc: 'Скоро', emoji: '🧱', bg: '#2a2a47', disabled: true },
-        { id: 'memory', title: 'Память', desc: 'Найди пары', emoji: '🧠', bg: '#2a1a47' },
-        { id: 'tap', title: 'Тап-тап', desc: 'Набери очки', emoji: '👆', bg: '#471a2a' },
-      ],
-      notes: [
-        { id: 1, title: 'Адвокат', body: 'Звонить Петровой до среды. Документы по делу передать лично.' },
-        { id: 2, title: 'Машины', body: 'BMW А123БВ777 — Сергей\nMercedes К456МН199 — Анна\nПарковка: Профсоюзная, подземная.' },
-        { id: 3, title: 'Вероника', body: 'Polo Е321КХ777 — проверить, когда будет время. Не обсуждать с Сергеем.' },
-      ],
-      calendar: [
-        { id: 1, date: '2026-06-22', title: 'Суд по делу Акуниной', time: '10:00' },
-        { id: 2, date: '2026-06-26', title: 'Встреча с адвокатом', time: '14:00' },
-        { id: 3, date: '2026-06-28', title: 'Осмотр BMW после ДТП', time: '11:30' },
-      ],
-    },
+    defaultData: CharactersDB.buildMainPhoneData(),
     gibddSeed: gibddSeed(),
   },
 
@@ -102,8 +55,8 @@ const PHONE_ACCOUNTS = {
     label: 'Служебная',
     passcode: '123456',
     adminPasscode: '654321',
-    gibddStorageKey: 'dym_gibdd_cars_alt_v2',
-    dataStorageKey: 'dym_phone_data_alt_v2',
+    gibddStorageKey: 'dym_gibdd_cars_alt_v4',
+    dataStorageKey: 'dym_phone_data_alt_v4',
     apps: [
       { app: 'messages', label: 'Сообщения', icon: 'messages', style: 'app-messages' },
       { app: 'calls', label: 'Телефон', icon: 'dialer', style: 'app-dialer' },
@@ -117,47 +70,7 @@ const PHONE_ACCOUNTS = {
       { app: 'gibdd-admin', label: 'ГИБДД+', icon: 'gibdd', style: 'app-gibdd-admin', adminOnly: true },
       { app: 'admin', label: 'Админ', icon: 'admin', style: 'app-admin', adminOnly: true },
     ],
-    defaultData: {
-      contacts: [
-        { id: 1, name: 'Артур Скорый', avatar: 'А', color: 'avatar-1', phone: '+7 (916) 440-12-08' },
-        { id: 2, name: 'Крылов', avatar: 'К', color: 'avatar-3', phone: '+7 (903) 771-55-20' },
-        { id: 3, name: 'МИА', avatar: 'М', color: 'avatar-4', phone: '+7 (495) 000-00-01' },
-        { id: 4, name: 'Неизвестный', avatar: '?', color: 'avatar-5', phone: '+7 (900) 000-00-01' },
-      ],
-      chats: [
-        { contactId: 1, messages: [
-          { text: 'Материалы по KAPNOS готовы. Смотри почту.', sent: false, time: '08:40' },
-          { text: 'Получил. Разберусь сегодня.', sent: true, time: '08:42' },
-        ], unread: true },
-        { contactId: 2, messages: [
-          { text: 'Проверьте номер Е321КХ777 в базе', sent: false, time: 'Вчера' },
-        ], unread: true },
-        { contactId: 4, messages: [
-          { text: 'Не звони сюда больше', sent: false, time: 'Пн' },
-        ], unread: false },
-      ],
-      emails: [
-        { id: 1, from: 'МИА', email: 'info@mia.gov', subject: 'Справка по делу KAPNOS', preview: 'Направляем материалы...', time: '09:10', unread: true, body: 'Направляем материалы по серии KAPNOS.\n\nВо вложении — сводка по номерам ТС.', color: 'avatar-4' },
-        { id: 2, from: 'Артур Скорый', email: 'a.skory@media.ru', subject: 'Черновик статьи', preview: 'Посмотри формулировки...', time: 'Вчера', unread: false, body: 'Посмотри формулировки в черновике. Не публикуй без согласования.', color: 'avatar-1' },
-      ],
-      callHistory: [
-        { contactId: 1, type: 'incoming', date: 'Сегодня, 08:35' },
-        { contactId: 4, type: 'missed', date: 'Пн, 22:14' },
-      ],
-      games: [],
-      notes: [
-        { id: 1, title: 'Номера для проверки', body: 'Е321КХ777 — Polo, Вероника\nМ555АА750 — Solaris, Иванов\nВ789ОР750 — Camry, 2009' },
-        { id: 2, title: 'KAPNOS', body: 'Сигарета в правой руке у левши — отметка серии. Проверить связь с парковкой на Строителей.' },
-      ],
-      calendar: [
-        { id: 1, date: '2026-06-22', title: 'Суд по делу Акуниной', time: '10:00' },
-        { id: 2, date: '2026-06-24', title: 'Встреча с Артуром', time: '18:30' },
-      ],
-      photos: [
-        { id: 1, title: 'Парковка', caption: 'Подземная парковка, ул. Строителей' },
-        { id: 2, title: 'Место ДТП 2009', caption: 'Озеро Сенеж, съезд с моста' },
-      ],
-    },
+    defaultData: CharactersDB.buildAltPhoneData(),
     gibddSeed: gibddSeed(),
   },
 };
