@@ -1,100 +1,101 @@
 #!/usr/bin/env bash
-# Синхронизация папки obsidian/ с https://github.com/sverons/Obsidian_Dym
+# Sync obsidian/ with https://github.com/bestkvestnn-pixel/Obsidian_Dym
 #
-# Использование:
-#   ./scripts/sync-obsidian-github.sh init     — добавить remote obsidian
-#   ./scripts/sync-obsidian-github.sh push     — отправить obsidian/ на GitHub
-#   ./scripts/sync-obsidian-github.sh pull     — забрать изменения с GitHub
-#   ./scripts/sync-obsidian-github.sh status   — статус
-#
-# Obsidian: откройте папку obsidian/ как vault, установите plugin «Obsidian Git».
-# Для автосинхронизации из Obsidian клонируйте Obsidian_Dym отдельно или используйте push/pull здесь.
+# Usage:
+#   ./scripts/sync-obsidian-github.sh init
+#   ./scripts/sync-obsidian-github.sh push
+#   ./scripts/sync-obsidian-github.sh pull
+#   ./scripts/sync-obsidian-github.sh status
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PREFIX="obsidian"
-REMOTE_NAME="obsidian"
-REMOTE_URL="${OBSIDIAN_GITHUB_URL:-https://github.com/sverons/Obsidian_Dym.git}"
+VAULT="$ROOT/obsidian"
+REMOTE_URL="${OBSIDIAN_GITHUB_URL:-https://github.com/bestkvestnn-pixel/Obsidian_Dym.git}"
 GIT_BRANCH="${OBSIDIAN_GITHUB_BRANCH:-main}"
 GH="${GH_BIN:-/tmp/gh-install/gh_2.69.0_macOS_arm64/bin/gh}"
 
-ensure_remote() {
-  if git -C "$ROOT" remote get-url "$REMOTE_NAME" &>/dev/null; then
-    current="$(git -C "$ROOT" remote get-url "$REMOTE_NAME")"
+ensure_vault_git() {
+  if [[ ! -d "$VAULT/.git" ]]; then
+    echo "-> git init in obsidian/"
+    git -C "$VAULT" init -b "$GIT_BRANCH"
+  fi
+
+  if git -C "$VAULT" remote get-url origin &>/dev/null; then
+    current="$(git -C "$VAULT" remote get-url origin)"
     if [[ "$current" != "$REMOTE_URL" ]]; then
-      echo "→ Обновление remote $REMOTE_NAME: $current → $REMOTE_URL"
-      git -C "$ROOT" remote set-url "$REMOTE_NAME" "$REMOTE_URL"
+      echo "-> update origin: $current -> $REMOTE_URL"
+      git -C "$VAULT" remote set-url origin "$REMOTE_URL"
     fi
   else
-    echo "→ Remote $REMOTE_NAME → $REMOTE_URL"
-    git -C "$ROOT" remote add "$REMOTE_NAME" "$REMOTE_URL"
+    echo "-> origin -> $REMOTE_URL"
+    git -C "$VAULT" remote add origin "$REMOTE_URL"
   fi
 }
 
 check_git_auth() {
-  if git -C "$ROOT" ls-remote "$REMOTE_NAME" &>/dev/null; then
+  if git -C "$VAULT" ls-remote origin &>/dev/null; then
     return 0
   fi
-  echo "⚠ Нет доступа к GitHub ($REMOTE_URL)." >&2
-  echo "  1. Создайте репозиторий Obsidian_Dym на github.com (private)" >&2
-  echo "  2. Авторизуйтесь: gh auth login  или  git push (через браузер)" >&2
-  echo "  3. Если git просит пароль — проверьте credential helper в ~/.gitconfig" >&2
+  echo "WARNING: no access to GitHub ($REMOTE_URL)." >&2
+  echo "  1. Create Obsidian_Dym repo in bestkvestnn-pixel account (private)" >&2
+  echo "  2. Run: gh auth login (bestkvestnn-pixel account)" >&2
+  echo "  3. Then: cd obsidian && git push -u origin $GIT_BRANCH" >&2
   return 1
 }
 
 create_github_repo() {
   if command -v "$GH" &>/dev/null && "$GH" auth status &>/dev/null; then
     if ! check_git_auth; then
-      echo "→ Создание репозитория Obsidian_Dym…"
-      "$GH" repo create Obsidian_Dym \
+      echo "-> creating Obsidian_Dym repo..."
+      "$GH" repo create bestkvestnn-pixel/Obsidian_Dym \
         --private \
-        --description "Obsidian vault: детективная игра «Дым над льдом»" \
+        --description "Obsidian vault: Dym nad ldom" \
         || true
     fi
   fi
 }
 
 init_sync() {
-  ensure_remote
+  ensure_vault_git
   create_github_repo
   echo ""
-  echo "✓ Remote настроен: $REMOTE_NAME → $(git -C "$ROOT" remote get-url "$REMOTE_NAME")"
-  echo "  Vault: $ROOT/$PREFIX"
-  echo "  Отправка: ./scripts/sync-obsidian-github.sh push"
+  echo "OK: vault git at $VAULT/.git"
+  echo "  origin -> $(git -C "$VAULT" remote get-url origin)"
+  echo "  push: ./scripts/sync-obsidian-github.sh push"
 }
 
 push_obsidian() {
   init_sync
   check_git_auth
 
-  if [[ -n "$(git -C "$ROOT" status --porcelain -- "$PREFIX")" ]]; then
-    echo "→ Коммит изменений в obsidian/…"
-    git -C "$ROOT" add "$PREFIX"
-    git -C "$ROOT" -c user.name="${GIT_USER_NAME:-Pavel}" \
+  if [[ -n "$(git -C "$VAULT" status --porcelain)" ]]; then
+    echo "-> commit vault changes..."
+    git -C "$VAULT" add -A
+    git -C "$VAULT" -c user.name="${GIT_USER_NAME:-Pavel}" \
       -c user.email="${GIT_USER_EMAIL:-pavel@users.noreply.github.com}" \
-      commit -m "obsidian: sync $(date '+%Y-%m-%d %H:%M')"
+      commit -m "vault backup: $(date '+%Y-%m-%d %H:%M')"
   fi
 
-  echo "-> Subtree push -> ${REMOTE_NAME}/${GIT_BRANCH}"
-  git -C "$ROOT" subtree push --prefix="$PREFIX" "$REMOTE_NAME" "$GIT_BRANCH"
-  echo "✓ Готово: $REMOTE_URL"
+  echo "-> push -> origin/$GIT_BRANCH"
+  git -C "$VAULT" push -u origin "$GIT_BRANCH"
+  echo "OK: $REMOTE_URL"
 }
 
 pull_obsidian() {
   init_sync
   check_git_auth
 
-  echo "-> Subtree pull <- ${REMOTE_NAME}/${GIT_BRANCH}"
-  git -C "$ROOT" subtree pull --prefix="$PREFIX" "$REMOTE_NAME" "$GIT_BRANCH" --squash -m "obsidian: pull $(date '+%Y-%m-%d %H:%M')"
-  echo "✓ obsidian/ обновлён"
+  echo "-> pull <- origin/$GIT_BRANCH"
+  git -C "$VAULT" pull --rebase origin "$GIT_BRANCH"
+  echo "OK: obsidian/ updated"
 }
 
 show_status() {
-  ensure_remote
-  echo "Проект: $ROOT"
-  echo "Remote: $REMOTE_NAME → $(git -C "$ROOT" remote get-url "$REMOTE_NAME")"
+  ensure_vault_git
+  echo "Vault: $VAULT"
+  echo "origin -> $(git -C "$VAULT" remote get-url origin)"
   echo ""
-  git -C "$ROOT" status -- "$PREFIX"
+  git -C "$VAULT" status
 }
 
 cmd="${1:-status}"
@@ -104,8 +105,8 @@ case "$cmd" in
   pull) pull_obsidian ;;
   status) show_status ;;
   *)
-    echo "Неизвестная команда: $cmd" >&2
-    echo "Команды: init | push | pull | status" >&2
+    echo "Unknown command: $cmd" >&2
+    echo "Commands: init | push | pull | status" >&2
     exit 1
     ;;
 esac

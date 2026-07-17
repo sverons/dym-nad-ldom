@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Новоград — Instagram-лента</title>
+  <style>
+    :root {
+      --bg: #0f0f10;
+      --card: #1a1a1c;
+      --line: #2a2a2e;
+      --text: #f2f2f2;
+      --muted: #a8a8b0;
+      --accent: #e8e8ea;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(ellipse at top, #1c2430 0%, var(--bg) 55%);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    header {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 28px 16px 8px;
+    }
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .feed {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 12px 12px 48px;
+      display: grid;
+      gap: 18px;
+    }
+    article {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+    }
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4a6fa5, #1e2a3a);
+      display: grid;
+      place-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #dce7f5;
+    }
+    .user { font-weight: 600; font-size: 0.92rem; }
+    .loc { color: var(--muted); font-size: 0.78rem; }
+    .photo {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      display: block;
+      background: #111;
+    }
+    .body { padding: 12px 14px 16px; }
+    .caption {
+      font-size: 0.94rem;
+      white-space: pre-wrap;
+      margin: 0 0 10px;
+    }
+    .caption strong { font-weight: 650; }
+    .tags { color: #8ab4f8; font-size: 0.86rem; margin-bottom: 12px; }
+    .comments {
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      display: grid;
+      gap: 7px;
+    }
+    .c {
+      font-size: 0.86rem;
+      color: var(--accent);
+    }
+    .c b { font-weight: 650; }
+    .c span { color: var(--muted); }
+    .num {
+      display: inline-block;
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Новоград · лента жителей</h1>
+    <p>20 постов для Instagram · без спойлеров сюжета</p>
+  </header>
+  <main class="feed" id="feed"></main>
+  <script>
+    const posts = [
+      {
+        user: "lera.naberezhnaya", loc: "Набережная", img: "01_naberezhnaya_kofe.png",
+        caption: "☕ 7:12. Набережная ещё спит, а я уже с кофе.\nНовоград умеет быть тихим — правда, только до восьми.",
+        tags: "#Новоград #утро #набережная #кофе",
+        comments: [
+          ["dima.zarechny", "Красота. Вчера на Заречной туман был ещё гуще"],
+          ["anya_coffee_ng", "Какой кофе? Если из «Зерна» — я тоже туда пересела"],
+          ["mama_galina52", "Лер, шапку надень, потом болеть будешь"],
+          ["igor.volkov92", "Набережная утром — самое честное место в городе"],
+        ]
+      },
+      {
+        user: "serik_petrovich", loc: "ул. Школьная", img: "02_dvor_sobaka.png",
+        caption: "Вечерний круг с Жучкой. Двор на Школьной, как всегда: снег, окна чужих жизней и собака, которой всё равно на наши дела.",
+        tags: "#двор #Новоград #собака #вечер",
+        comments: [
+          ["zhanna.pr", "Жучка звезда. Добрый вечер, Сергей Петрович"],
+          ["kvartal_14", "У нас на 14-м тоже такая тишина по вечерам"],
+          ["olga.klinika", "Милота. Держитесь теплее ❄️"],
+          ["roma_zimin", "Классика Новограда. Только шапка у вас фирменная 😄"],
+        ]
+      },
+      {
+        user: "katya_and_max", loc: "Озеро", img: "03_ozero_para.png",
+        caption: "Съездили к озеру. Лёд тонкий, разговаривать толком не о чем — и так нормально.\nИногда город надо оставлять за спиной.",
+        tags: "#озеро #мы #выходной #Новоград",
+        comments: [
+          ["lera.naberezhnaya", "Ох какая картинка"],
+          ["max_photo_ng", "Катя, это же почти открытка"],
+          ["tisha_fisher", "Осторожно на льду, в прошлом году просадка была"],
+          ["inna_salon", "Вы самые красивые в этом городе, я сказала"],
+        ]
+      },
+      {
+        user: "kvadrat_rieltor", loc: "ул. Строителей, 11", img: "04_rieltor_kvartira.png",
+        caption: "Показ на Строителей 11. Свет хороший, вид на двор — честный, без прикрас.\nЕсли ищете двушку — пишите в директ. Новоград всё ещё умеет удивлять планировками 😊",
+        tags: "#риелтор #квартира #Новоград #показ",
+        comments: [
+          ["buyer_ng2025", "Сколько? Ипотека возможна?"],
+          ["eugene.t_partners", "Хороший свет, да. Клиент уйдёт довольный"],
+          ["kristina.sec", "Ой я эту площадку знаю 👀"],
+          ["pasha_smart", "А умный дом там есть или «как получится»?"],
+        ]
+      },
+      {
+        user: "pekarnja_na_tihoy", loc: "ул. Тихая", img: "05_pekarnja.png",
+        caption: "Свежая партия. Кто первый за круассанами — тот чемпион утра.\nМы на Тихой, с 7:00. Хлеб ещё тёплый.",
+        tags: "#пекарня #Тихая #Новоград #выпечка",
+        comments: [
+          ["lera.naberezhnaya", "Вы спасаете мои утра"],
+          ["babushka_rynok", "Раньше булки были пышнее… шучу, берите всё"],
+          ["stas_office", "Заеду после совещания. Оставьте один с маком"],
+          ["natalya_prozrenie", "Взяла вчера для клиники — коллеги разобрали за 10 минут"],
+        ]
+      },
+      {
+        user: "lev_iz_sektora_b", loc: "Стадион", img: "06_stadion_fan.png",
+        caption: "ЛЬВЫЫЫЫ 🔥\n1:0 — и весь Новоград орёт вместе с нами.\nСектор Б не замолкает.",
+        tags: "#НовоградскиеЛьвы #футбол #нашгород",
+        comments: [
+          ["fan_brigada152", "СЕКТОР Б НА МЕСТЕ"],
+          ["dima.zarechny", "А я по радио слушал. Какой матч"],
+          ["anna_gold_sq", "Соседи снизу тоже орали. Поздравляю 🦁"],
+          ["taxi_ng_night", "После матча пробки на час. Но оно того стоило"],
+        ]
+      },
+      {
+        user: "galina_rynok", loc: "Городской рынок", img: "07_rynok_babushka.png",
+        caption: "Рынок как рынок: яблоки, очереди и все знакомы с малолетства.\nНовоград зимой пахнет морозом и яблочной кожурой.",
+        tags: "#рынок #Новоград #утро",
+        comments: [
+          ["pekarnja_na_tihoy", "Галина, а свеклу брали? Мы пироги печём"],
+          ["serik_petrovich", "Доброе утро! Жучка сегодня дома — жарко ей"],
+          ["olga.klinika", "Вы всегда выбираете самое лучшее 🍎"],
+          ["kvartal_14", "Рынок — единственное место, где ещё здороваются"],
+        ]
+      },
+      {
+        user: "prozrenie_front", loc: "ProЗрение", img: "08_klinika_admin.png",
+        caption: "Доброе утро от администраторов «ProЗрение» 👁\nЗапись на проверку зрения — в директ или по телефону на рецепции.\nПусть в Новограде все видят ясно.",
+        tags: "#ProЗрение #клиника #Новоград #здоровье",
+        comments: [
+          ["natalya_prozrenie", "Коллеги, красотки 💙"],
+          ["viktor_ophthal", "Хороший кадр. Аквариум в кадре следующий раз? 😄"],
+          ["lera.naberezhnaya", "Записалась на четверг!"],
+          ["kristina.sec", "У вас всегда так чисто… завидую тихо"],
+        ]
+      },
+      {
+        user: "polina.busstop", loc: "ул. Молодёжная", img: "09_ostanovka_naushniki.png",
+        caption: "15 минут задержка.\nНаушники + снег = мой Новоград.\nЕсли 42-й снова не приедет — иду пешком через Молодёжную.",
+        tags: "#остановка #снег #настроение #Новоград",
+        comments: [
+          ["lev_iz_sektora_b", "42-й легенда. Жди или сдавайся"],
+          ["katya_and_max", "Полина, так атмосферно сняла"],
+          ["mama_galina52", "Полиночка, так поздно на улице!"],
+          ["igor.volkov92", "Молодёжная ночью — отдельный фильм"],
+        ]
+      },
+      {
+        user: "tisha_fisher", loc: "Река", img: "10_rybak_tuman.png",
+        caption: "Туман над водой. Город ещё спит, а река уже работает.\nКлёва сегодня нет. Тишины — с избытком.",
+        tags: "#рыбалка #туман #Новоград #утро",
+        comments: [
+          ["serik_petrovich", "Классика. Чай в термосе есть?"],
+          ["dima.zarechny", "С Заречной то же небо. Красиво"],
+          ["roma_zimin", "Дым над водой — будто город курит"],
+          ["max_photo_ng", "Можно в печать. Серьёзно"],
+        ]
+      },
+      {
+        user: "zerno_cafe_ng", loc: "Набережная, 15", img: "11_kofeinja_barista.png",
+        caption: "Новый латте. Рисуем сердца — бесплатно, улыбки — по желанию.\nЖдём на Набережной, 15.",
+        tags: "#зерно #кофейня #Новоград #латте",
+        comments: [
+          ["lera.naberezhnaya", "ЭТО МОЙ ЛАТТЕ. Я была первой сегодня"],
+          ["artur.skory_press", "Хорошее место для текста. Тихо до 11"],
+          ["anya_coffee_ng", "Пена космос"],
+          ["zhurnalist_kafe", "Закладывайте столик у окна — вид лучший"],
+        ]
+      },
+      {
+        user: "taxi_ng_night", loc: "Ночной Новоград", img: "12_nochnoe_taksi.png",
+        caption: "Смена. Дождь. Аптечный крест горит как маяк.\nНовоград ночью — другой город: меньше людей, больше отражений.",
+        tags: "#такси #ночь #Новоград #смена",
+        comments: [
+          ["polina.busstop", "Узнала этот перекрёсток"],
+          ["lev_iz_sektora_b", "После матча вы нас спасаете"],
+          ["inna_salon", "Езжу только с вами, честно"],
+          ["stas_office", "«Меньше людей, больше отражений» — в цитату"],
+        ]
+      },
+      {
+        user: "cvety_molodezhnaya", loc: "ул. Молодёжная, 5", img: "13_cvetj_magazin.png",
+        caption: "Зимний букет без повода — тоже повод.\nМы на Молодёжной, 5. Собираем за 15 минут.",
+        tags: "#цветы #букет #Новоград #Молодёжная",
+        comments: [
+          ["katya_and_max", "Макс, смотри и учись 😏"],
+          ["kvadrat_rieltor", "Брали у вас на сдачу квартиры — клиент растаял"],
+          ["veronika.m", "Хочу такой же 💗"],
+          ["galina_rynok", "Живые и красивые. Как надо"],
+        ]
+      },
+      {
+        user: "stas_office", loc: "Офис", img: "14_obed_v_ofise.png",
+        caption: "Обед с видом на крыши.\nСегодня гречка. Завтра снова гречка.\nНовоградский open space не про романтику — про термос и дедлайны.",
+        tags: "#работа #офис #обед #Новоград",
+        comments: [
+          ["zerno_cafe_ng", "Можно же к нам спуститься…"],
+          ["pasha_smart", "У тебя окна лучше, чем у меня умный дом"],
+          ["eugene.t_partners", "Классика. Гречка объединяет"],
+          ["buyer_ng2025", "Вид как у нас в объявлении 😄"],
+        ]
+      },
+      {
+        user: "mama_mari", loc: "Школа", img: "15_shkola_utrom.png",
+        caption: "Школа. Мороз. «Мам, быстрее».\nКаждое утро одно и то же — и каждый раз немного другое.\nНовоград растит нас вместе с детьми.",
+        tags: "#школа #утро #мамыНовограда",
+        comments: [
+          ["galina_rynok", "Держитесь, девочки. Мы тоже так росли"],
+          ["pekarnja_na_tihoy", "После школы — за булочкой!"],
+          ["olga.klinika", "У вас такие красивые моменты"],
+          ["kvartal_14", "Школьная — родная остановка всех мам"],
+        ]
+      },
+      {
+        user: "artur.skory_press", loc: "Кофейня", img: "16_zhurnalist_kafe.png",
+        caption: "Черновик в блокноте. Кофе стынет.\nГород даёт темы медленно — надо уметь ждать.",
+        tags: "#заметки #Новоград #пресса #работа",
+        comments: [
+          ["zerno_cafe_ng", "Артур, ваш столик свободен всегда ☕"],
+          ["max_photo_ng", "Когда репортаж — зови"],
+          ["zhanna.pr", "Читаю ваши тексты. Держите планку"],
+          ["viktor_ophthal", "Интересно, о чём на этот раз?"],
+        ]
+      },
+      {
+        user: "nasty_fit_ng", loc: "Зал", img: "17_zal_selfi.png",
+        caption: "День ног. Без отмазок.\nКто из Новограда тоже в зале сегодня — отметьтесь.",
+        tags: "#спорт #зал #мотивация #Новоград",
+        comments: [
+          ["lev_iz_sektora_b", "Я только с матча… завтра точно"],
+          ["polina.busstop", "Завидую дисциплине"],
+          ["inna_salon", "После зала — к нам на восстановление 💇‍♀️"],
+          ["katya_and_max", "Настя машина"],
+        ]
+      },
+      {
+        user: "ugol_barber_ng", loc: "ул. Складская", img: "18_barbershop.png",
+        caption: "Классика машинкой. Разговор ни о чём — лучший сервис.\nЗапись в директ. Угол Складской.",
+        tags: "#барбер #стрижка #Новоград #мужское",
+        comments: [
+          ["igor.volkov92", "Брат, как всегда огонь"],
+          ["serik_petrovich", "Мне бы так аккуратно…"],
+          ["taxi_ng_night", "Заеду между сменами"],
+          ["roma_zimin", "Единственный, кому доверяю виски и виски-фейд"],
+        ]
+      },
+      {
+        user: "roma_zimin", loc: "Балкон", img: "19_balkon_dym.png",
+        caption: "Балкон. Дым. Крыши.\nИногда весь Новоград кажется одним долгим выдохом.",
+        tags: "#вечер #балкон #настроение #Новоград",
+        comments: [
+          ["tisha_fisher", "Дым над крышами. Понимаю"],
+          ["artur.skory_press", "Сильный кадр. Можно было бы в газету"],
+          ["lera.naberezhnaya", "Ром, лирика пошла?"],
+          ["dima.zarechny", "У нас на Заречной тот же свет"],
+        ]
+      },
+      {
+        user: "katok_central_ng", loc: "Центральный каток", img: "20_katok_druzya.png",
+        caption: "Центральный каток открыт!\nДрузья, коньки и гирлянды — Новоград умеет быть мягким.\nБилеты / прокат — в сторис.",
+        tags: "#каток #зима #друзья #Новоград",
+        comments: [
+          ["katya_and_max", "Мы там были вчера!!!"],
+          ["polina.busstop", "Хочу с вами на лёд"],
+          ["nasty_fit_ng", "Это тоже тренировка 😎"],
+          ["mama_mari", "Детей завтра приведём"],
+          ["zerno_cafe_ng", "После катка — согревающий какао у нас"],
+        ]
+      },
+    ];
+
+    const feed = document.getElementById("feed");
+    posts.forEach((p, i) => {
+      const initials = p.user.slice(0, 2).toUpperCase();
+      const el = document.createElement("article");
+      el.innerHTML = `
+        <div class="top">
+          <div class="avatar">${initials}</div>
+          <div>
+            <div class="user">@${p.user}</div>
+            <div class="loc">${p.loc}</div>
+          </div>
+          <span class="num">${i + 1}/20</span>
+        </div>
+        <img class="photo" src="${p.img}" alt="@${p.user}" loading="lazy" />
+        <div class="body">
+          <p class="caption"><strong>@${p.user}</strong> ${p.caption.replace(/\n/g, "<br>")}</p>
+          <div class="tags">${p.tags}</div>
+          <div class="comments">
+            ${p.comments.map(([u, t]) => `<div class="c"><b>@${u}</b> ${t}</div>`).join("")}
+          </div>
+        </div>`;
+      feed.appendChild(el);
+    });
+  </script>
+</body>
+</html>

@@ -11,9 +11,10 @@ const APP_ICONS = {
   novagram: '<img class="novogram-icon-img" src="./assets/novogram-icon.png" alt="" draggable="false" />',
   notes: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M6 2h9.5L18 4.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path fill="#e8c547" d="M15 2v3h3"/><rect x="7" y="11" width="10" height="1.4" rx=".7" fill="#c9a227" opacity=".55"/><rect x="7" y="14" width="10" height="1.4" rx=".7" fill="#c9a227" opacity=".55"/><rect x="7" y="17" width="7" height="1.4" rx=".7" fill="#c9a227" opacity=".55"/></svg>',
   photos: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.2" fill="#fff"/><ellipse cx="12" cy="6.5" rx="2.8" ry="3.8" fill="#fff"/><ellipse cx="12" cy="17.5" rx="2.8" ry="3.8" fill="#fff"/><ellipse cx="6.5" cy="12" rx="3.8" ry="2.8" fill="#fff"/><ellipse cx="17.5" cy="12" rx="3.8" ry="2.8" fill="#fff"/><ellipse cx="8" cy="8" rx="2.5" ry="3.2" transform="rotate(-45 8 8)" fill="#fff" opacity=".92"/><ellipse cx="16" cy="8" rx="2.5" ry="3.2" transform="rotate(45 16 8)" fill="#fff" opacity=".92"/><ellipse cx="8" cy="16" rx="2.5" ry="3.2" transform="rotate(45 8 16)" fill="#fff" opacity=".92"/><ellipse cx="16" cy="16" rx="2.5" ry="3.2" transform="rotate(-45 16 16)" fill="#fff" opacity=".92"/></svg>',
-  calendar: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="3" fill="#fff"/><path fill="#ff3b30" d="M4 8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3H4V8z"/><rect x="7.5" y="3" width="2" height="4" rx="1" fill="#aeaeb2"/><rect x="14.5" y="3" width="2" height="4" rx="1" fill="#aeaeb2"/><text x="12" y="18.5" text-anchor="middle" fill="#1d1d1f" font-size="8.5" font-weight="700" font-family="-apple-system,sans-serif">24</text></svg>',
+  calendar: null, // собирается динамически в calendarIconSvg()
   admin: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 1 0 12 8.5z"/><path fill="#fff" d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
   maps: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>',
+  browser: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="2"/><ellipse cx="12" cy="12" rx="4" ry="9" fill="none" stroke="#fff" stroke-width="1.6"/><path fill="none" stroke="#fff" stroke-width="1.6" d="M3.5 9.5h17M3.5 14.5h17"/></svg>',
   hints: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C7.79 2 5 4.79 5 8c0 2.34 1.28 4.38 3.18 5.47L9 20h6l.82-6.53C17.72 12.38 19 10.34 19 8c0-3.21-2.79-6-7-6z"/></svg>',
 };
 
@@ -30,7 +31,7 @@ const PHONE_ACCOUNTS = {
     passcode: '128500',
     adminPasscode: '000000',
     gibddStorageKey: 'dym_gibdd_cars_main_v4',
-    dataStorageKey: 'dym_phone_data_main_v4',
+    dataStorageKey: 'dym_phone_data_main_v5',
     apps: [
       { app: 'mail', label: 'Почта', icon: 'mail', style: 'app-mail' },
       { app: 'calls', label: 'Телефон', icon: 'dialer', style: 'app-dialer' },
@@ -39,6 +40,7 @@ const PHONE_ACCOUNTS = {
       { app: 'notes', label: 'Заметки', icon: 'notes', style: 'app-notes' },
       { app: 'calendar', label: 'Календарь', icon: 'calendar', style: 'app-calendar' },
       { app: 'maps', label: 'Навигатор', icon: 'maps', style: 'app-maps' },
+      { app: 'browser', label: 'Браузер', icon: 'browser', style: 'app-browser' },
       { app: 'hints', label: 'Подсказки', icon: 'hints', style: 'app-hints' },
       { app: 'games', label: 'Игры', icon: 'games', style: 'app-games' },
       { app: 'novagram', label: 'Novagram', icon: 'novagram', style: 'app-novagram' },
@@ -66,6 +68,7 @@ const PHONE_ACCOUNTS = {
       { app: 'photos', label: 'Фото', icon: 'photos', style: 'app-photos' },
       { app: 'calendar', label: 'Календарь', icon: 'calendar', style: 'app-calendar' },
       { app: 'maps', label: 'Навигатор', icon: 'maps', style: 'app-maps' },
+      { app: 'browser', label: 'Браузер', icon: 'browser', style: 'app-browser' },
       { app: 'hints', label: 'Подсказки', icon: 'hints', style: 'app-hints' },
       { app: 'gibdd-admin', label: 'ГИБДД+', icon: 'gibdd', style: 'app-gibdd-admin', adminOnly: true },
       { app: 'admin', label: 'Админ', icon: 'admin', style: 'app-admin', adminOnly: true },
@@ -138,12 +141,25 @@ function findAccountByPasscode(code) {
 
 const RICH_ICONS = new Set(['phonebook', 'notes', 'calendar', 'novagram']);
 
+function calendarIconSvg(day) {
+  const n = Math.max(1, Math.min(31, Number(day) || 21));
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="3" fill="#fff"/><path fill="#ff3b30" d="M4 8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3H4V8z"/><rect x="7.5" y="3" width="2" height="4" rx="1" fill="#aeaeb2"/><rect x="14.5" y="3" width="2" height="4" rx="1" fill="#aeaeb2"/><text x="12" y="18.5" text-anchor="middle" fill="#1d1d1f" font-size="8.5" font-weight="700" font-family="-apple-system,sans-serif">${n}</text></svg>`;
+}
+
+function iconFor(item) {
+  if (item.icon === 'calendar') {
+    const day = window.StoryState ? StoryState.getDateParts().day : 21;
+    return calendarIconSvg(day);
+  }
+  return APP_ICONS[item.icon] || '';
+}
+
 function renderAccountApps(account, isAdmin) {
   return account.apps
     .filter(item => !item.adminOnly || isAdmin)
     .map(item => `
       <div class="app-icon${item.adminOnly ? ' admin-only' : ''}" data-app="${item.app}">
-        <div class="icon-bg ios-app-icon ${item.style}${RICH_ICONS.has(item.icon) ? ' icon-rich' : ''}">${APP_ICONS[item.icon] || ''}</div>
+        <div class="icon-bg ios-app-icon ${item.style}${RICH_ICONS.has(item.icon) ? ' icon-rich' : ''}">${iconFor(item)}</div>
         <span>${item.label}</span>
       </div>
     `).join('');

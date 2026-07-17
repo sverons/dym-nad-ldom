@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Админка Novogram</title>
+  <link rel="stylesheet" href="./novogram-admin.css" />
+</head>
+<body>
+  <header class="nga-header">
+    <div>
+      <h1>Novogram Admin</h1>
+      <p>Профили, посты и комментарии жителей Новограда</p>
+    </div>
+    <div class="nga-header-actions">
+      <button type="button" class="nga-btn" id="exportBtn">Экспорт</button>
+      <label class="nga-btn">
+        Импорт
+        <input type="file" id="importInput" accept="application/json" hidden />
+      </label>
+      <button type="button" class="nga-btn nga-danger" id="resetBtn">Сбросить правки</button>
+      <a class="nga-btn" href="./admin.html">Админка телефона</a>
+      <a class="nga-btn nga-primary" href="./index.html" target="_blank">Открыть Novogram</a>
+    </div>
+  </header>
+
+  <main class="nga-shell">
+    <aside class="nga-sidebar">
+      <button type="button" class="nga-nav active" data-view="posts">
+        <span>Посты</span><b id="postsCount">0</b>
+      </button>
+      <button type="button" class="nga-nav" data-view="users">
+        <span>Профили</span><b id="usersCount">0</b>
+      </button>
+      <button type="button" class="nga-nav" data-view="comments">
+        <span>Комментарии</span><b id="commentsCount">0</b>
+      </button>
+    </aside>
+
+    <section class="nga-workspace">
+      <div class="nga-state-tabs">
+        <button type="button" class="nga-state-tab active" data-chapter="1">1-е состояние · 21 февраля</button>
+        <button type="button" class="nga-state-tab" data-chapter="2">2-е состояние · 23 марта</button>
+      </div>
+      <div class="nga-toolbar">
+        <div>
+          <h2 id="viewTitle">Посты</h2>
+          <p id="viewSubtitle">Управление лентой Novogram</p>
+        </div>
+        <div class="nga-toolbar-actions">
+          <input type="search" id="searchInput" placeholder="Поиск…" />
+          <button type="button" class="nga-btn nga-primary" id="createBtn">+ Новый пост</button>
+        </div>
+      </div>
+      <div id="content"></div>
+    </section>
+
+    <aside class="nga-editor" id="editor">
+      <div class="nga-empty-editor">
+        <strong>Выберите элемент</strong>
+        <span>или создайте новый</span>
+      </div>
+    </aside>
+  </main>
+
+  <div class="nga-toast" id="toast" hidden></div>
+
+  <script src="./story-state.js"></script>
+  <script src="./novogram-data.js"></script>
+  <script src="./novogram-prepared.js"></script>
+  <script src="./novogram-prepared-chapter2.js"></script>
+  <script src="./novogram-photo-fingerprints.js"></script>
+  <script src="./novogram-filler.js"></script>
+  <script src="./admin-store.js"></script>
+  <script src="./novogram-admin.js"></script>
+</body>
+</html>

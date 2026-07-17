@@ -4,12 +4,18 @@
   let editingEmail = null;
   let editingChat = null;
   let editingUser = null;
+  let editingNote = null;
+  let editingCalendar = null;
+  let editingPhoto = null;
   let showForm = false;
 
   let contactForm = { name: '', phone: '' };
   let emailForm = { from: '', email: '', subject: '', preview: '', body: '', time: '', unread: true };
   let msgForm = { contactId: '', text: '', sent: false, time: '' };
   let userForm = { label: '', passcode: '', adminPasscode: '', templateId: 'alt' };
+  let noteForm = { title: '', body: '' };
+  let calendarForm = { date: '', title: '', time: '' };
+  let photoForm = { title: '', caption: '' };
 
   function esc(text) {
     return String(text ?? '')
@@ -29,12 +35,23 @@
     editingEmail = null;
     editingChat = null;
     editingUser = null;
+    editingNote = null;
+    editingCalendar = null;
+    editingPhoto = null;
   }
 
   function renderMenu(data) {
     const customUsers = PhoneAccounts.loadCustomAccounts();
     return `
       <div class="admin-menu">
+        <a class="admin-menu-item" href="./admin.html">
+          <span>Полная админка</span>
+          <span>↗</span>
+        </a>
+        <a class="admin-menu-item" href="./novogram-admin.html">
+          <span>Novogram Admin</span>
+          <span>↗</span>
+        </a>
         <button type="button" class="admin-menu-item" data-view="users">
           <span>Пользователи</span>
           <span>${customUsers.length}</span>
@@ -50,6 +67,18 @@
         <button type="button" class="admin-menu-item" data-view="emails">
           <span>Почта</span>
           <span>${data.emails.length}</span>
+        </button>
+        <button type="button" class="admin-menu-item" data-view="notes">
+          <span>Заметки</span>
+          <span>${(data.notes || []).length}</span>
+        </button>
+        <button type="button" class="admin-menu-item" data-view="calendar">
+          <span>Календарь</span>
+          <span>${(data.calendar || []).length}</span>
+        </button>
+        <button type="button" class="admin-menu-item" data-view="photos">
+          <span>Фото</span>
+          <span>${(data.photos || []).length}</span>
         </button>
         <button type="button" class="admin-menu-item" data-view="gibdd">
           <span>База ГИБДД</span>
@@ -229,6 +258,106 @@
     `;
   }
 
+  function renderNotesView(data) {
+    const notes = data.notes || [];
+    return `
+      <div class="admin-toolbar">
+        <button type="button" class="admin-link" data-action="add-note">+ Новая заметка</button>
+      </div>
+      ${showForm || editingNote !== null ? `
+        <div class="admin-form">
+          <input type="text" id="adminNoteTitle" placeholder="Заголовок" value="${esc(noteForm.title)}" />
+          <textarea id="adminNoteBody" placeholder="Текст">${esc(noteForm.body)}</textarea>
+          <div class="admin-form-actions">
+            <button type="button" class="gibdd-btn gibdd-btn-primary" data-action="save-note">Сохранить</button>
+            <button type="button" class="admin-link danger" data-action="cancel-form">Отмена</button>
+          </div>
+        </div>
+      ` : ''}
+      <div class="admin-list">
+        ${notes.length ? notes.map(note => `
+          <div class="admin-list-row">
+            <div>
+              <p class="admin-list-title">${esc(note.title)}</p>
+              <p class="admin-list-sub">${esc(note.body)}</p>
+            </div>
+            <div class="admin-row-actions">
+              <button type="button" data-edit-note="${note.id}">✎</button>
+              <button type="button" data-delete-note="${note.id}">🗑</button>
+            </div>
+          </div>
+        `).join('') : '<p class="admin-hint">Нет заметок.</p>'}
+      </div>
+    `;
+  }
+
+  function renderCalendarView(data) {
+    const events = data.calendar || [];
+    return `
+      <div class="admin-toolbar">
+        <button type="button" class="admin-link" data-action="add-calendar">+ Новое событие</button>
+      </div>
+      ${showForm || editingCalendar !== null ? `
+        <div class="admin-form">
+          <input type="text" id="adminCalDate" placeholder="Дата (2026-02-21)" value="${esc(calendarForm.date)}" />
+          <input type="text" id="adminCalTitle" placeholder="Событие" value="${esc(calendarForm.title)}" />
+          <input type="text" id="adminCalTime" placeholder="Время" value="${esc(calendarForm.time)}" />
+          <div class="admin-form-actions">
+            <button type="button" class="gibdd-btn gibdd-btn-primary" data-action="save-calendar">Сохранить</button>
+            <button type="button" class="admin-link danger" data-action="cancel-form">Отмена</button>
+          </div>
+        </div>
+      ` : ''}
+      <div class="admin-list">
+        ${events.length ? events.map(event => `
+          <div class="admin-list-row">
+            <div>
+              <p class="admin-list-title">${esc(event.title)}</p>
+              <p class="admin-list-sub">${esc(event.date)} · ${esc(event.time)}</p>
+            </div>
+            <div class="admin-row-actions">
+              <button type="button" data-edit-calendar="${event.id}">✎</button>
+              <button type="button" data-delete-calendar="${event.id}">🗑</button>
+            </div>
+          </div>
+        `).join('') : '<p class="admin-hint">Нет событий.</p>'}
+      </div>
+    `;
+  }
+
+  function renderPhotosView(data) {
+    const photos = data.photos || [];
+    return `
+      <div class="admin-toolbar">
+        <button type="button" class="admin-link" data-action="add-photo">+ Новое фото</button>
+      </div>
+      ${showForm || editingPhoto !== null ? `
+        <div class="admin-form">
+          <input type="text" id="adminPhotoTitle" placeholder="Название" value="${esc(photoForm.title)}" />
+          <textarea id="adminPhotoCaption" placeholder="Подпись">${esc(photoForm.caption)}</textarea>
+          <div class="admin-form-actions">
+            <button type="button" class="gibdd-btn gibdd-btn-primary" data-action="save-photo">Сохранить</button>
+            <button type="button" class="admin-link danger" data-action="cancel-form">Отмена</button>
+          </div>
+        </div>
+      ` : ''}
+      <div class="admin-list">
+        ${photos.length ? photos.map(photo => `
+          <div class="admin-list-row">
+            <div>
+              <p class="admin-list-title">${esc(photo.title)}</p>
+              <p class="admin-list-sub">${esc(photo.caption)}</p>
+            </div>
+            <div class="admin-row-actions">
+              <button type="button" data-edit-photo="${photo.id}">✎</button>
+              <button type="button" data-delete-photo="${photo.id}">🗑</button>
+            </div>
+          </div>
+        `).join('') : '<p class="admin-hint">Нет фото.</p>'}
+      </div>
+    `;
+  }
+
   function renderGibddView() {
     return `
       <p class="admin-hint">Для редактирования базы авто используйте приложение «ГИБДД+».</p>
@@ -251,6 +380,9 @@
       contacts: renderContactsView(data),
       messages: renderMessagesView(data),
       emails: renderEmailsView(data),
+      notes: renderNotesView(data),
+      calendar: renderCalendarView(data),
+      photos: renderPhotosView(data),
       gibdd: renderGibddView(),
     };
 
@@ -260,6 +392,9 @@
       contacts: 'Контакты',
       messages: 'Сообщения',
       emails: 'Почта',
+      notes: 'Заметки',
+      calendar: 'Календарь',
+      photos: 'Фото',
       gibdd: 'База ГИБДД',
     };
 
@@ -544,7 +679,147 @@
       if (!confirm('Сбросить все данные этой учётной записи?')) return;
       PhoneSession.resetData();
       GibddDB.resetCarsToSeed();
+      if (window.AdminStore) AdminStore.resetNovogramOverrides();
       render();
+    });
+
+    screen.querySelector('[data-action="add-note"]')?.addEventListener('click', () => {
+      editingNote = null;
+      noteForm = { title: '', body: '' };
+      showForm = true;
+      render();
+    });
+
+    screen.querySelector('[data-action="save-note"]')?.addEventListener('click', () => {
+      const title = document.getElementById('adminNoteTitle')?.value.trim();
+      const body = document.getElementById('adminNoteBody')?.value.trim();
+      if (!title) return;
+      const d = PhoneSession.getData();
+      if (!d.notes) d.notes = [];
+      if (editingNote) {
+        const note = d.notes.find(n => n.id === editingNote);
+        if (note) Object.assign(note, { title, body });
+      } else {
+        const nextId = Math.max(0, ...d.notes.map(n => Number(n.id) || 0)) + 1;
+        d.notes.unshift({ id: nextId, title, body });
+      }
+      PhoneSession.saveData();
+      resetForms();
+      render();
+    });
+
+    screen.querySelectorAll('[data-edit-note]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const note = (PhoneSession.getData().notes || []).find(n => String(n.id) === btn.dataset.editNote);
+        if (!note) return;
+        editingNote = note.id;
+        noteForm = { title: note.title, body: note.body };
+        showForm = true;
+        render();
+      });
+    });
+
+    screen.querySelectorAll('[data-delete-note]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!confirm('Удалить заметку?')) return;
+        const d = PhoneSession.getData();
+        d.notes = (d.notes || []).filter(n => String(n.id) !== btn.dataset.deleteNote);
+        PhoneSession.saveData();
+        render();
+      });
+    });
+
+    screen.querySelector('[data-action="add-calendar"]')?.addEventListener('click', () => {
+      editingCalendar = null;
+      calendarForm = { date: '2026-02-21', title: '', time: '10:00' };
+      showForm = true;
+      render();
+    });
+
+    screen.querySelector('[data-action="save-calendar"]')?.addEventListener('click', () => {
+      const date = document.getElementById('adminCalDate')?.value.trim();
+      const title = document.getElementById('adminCalTitle')?.value.trim();
+      const time = document.getElementById('adminCalTime')?.value.trim();
+      if (!date || !title) return;
+      const d = PhoneSession.getData();
+      if (!d.calendar) d.calendar = [];
+      if (editingCalendar) {
+        const event = d.calendar.find(c => c.id === editingCalendar);
+        if (event) Object.assign(event, { date, title, time });
+      } else {
+        const nextId = Math.max(0, ...d.calendar.map(c => Number(c.id) || 0)) + 1;
+        d.calendar.push({ id: nextId, date, title, time });
+      }
+      PhoneSession.saveData();
+      resetForms();
+      render();
+    });
+
+    screen.querySelectorAll('[data-edit-calendar]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const event = (PhoneSession.getData().calendar || []).find(c => String(c.id) === btn.dataset.editCalendar);
+        if (!event) return;
+        editingCalendar = event.id;
+        calendarForm = { date: event.date, title: event.title, time: event.time };
+        showForm = true;
+        render();
+      });
+    });
+
+    screen.querySelectorAll('[data-delete-calendar]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!confirm('Удалить событие?')) return;
+        const d = PhoneSession.getData();
+        d.calendar = (d.calendar || []).filter(c => String(c.id) !== btn.dataset.deleteCalendar);
+        PhoneSession.saveData();
+        render();
+      });
+    });
+
+    screen.querySelector('[data-action="add-photo"]')?.addEventListener('click', () => {
+      editingPhoto = null;
+      photoForm = { title: '', caption: '' };
+      showForm = true;
+      render();
+    });
+
+    screen.querySelector('[data-action="save-photo"]')?.addEventListener('click', () => {
+      const title = document.getElementById('adminPhotoTitle')?.value.trim();
+      const caption = document.getElementById('adminPhotoCaption')?.value.trim();
+      if (!title) return;
+      const d = PhoneSession.getData();
+      if (!d.photos) d.photos = [];
+      if (editingPhoto) {
+        const photo = d.photos.find(p => p.id === editingPhoto);
+        if (photo) Object.assign(photo, { title, caption });
+      } else {
+        const nextId = Math.max(0, ...d.photos.map(p => Number(p.id) || 0)) + 1;
+        d.photos.unshift({ id: nextId, title, caption });
+      }
+      PhoneSession.saveData();
+      resetForms();
+      render();
+    });
+
+    screen.querySelectorAll('[data-edit-photo]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const photo = (PhoneSession.getData().photos || []).find(p => String(p.id) === btn.dataset.editPhoto);
+        if (!photo) return;
+        editingPhoto = photo.id;
+        photoForm = { title: photo.title, caption: photo.caption };
+        showForm = true;
+        render();
+      });
+    });
+
+    screen.querySelectorAll('[data-delete-photo]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!confirm('Удалить фото?')) return;
+        const d = PhoneSession.getData();
+        d.photos = (d.photos || []).filter(p => String(p.id) !== btn.dataset.deletePhoto);
+        PhoneSession.saveData();
+        render();
+      });
     });
   }
 

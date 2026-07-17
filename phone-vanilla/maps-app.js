@@ -1,558 +1,699 @@
+/** Навигатор Новограда — карта, места, координаты, маршрут (промт 2026-07-16). */
 (function () {
-  const DEFAULT_FROM = 'novograd';
-  const NAV_CAR = './assets/nav-car.svg';
+  const STORAGE_KEY = 'navigator_module_v1';
+  const TABS = [
+    { id: 'map', label: 'Карта' },
+    { id: 'places', label: 'Места' },
+    { id: 'coords', label: 'Координаты' },
+    { id: 'route', label: 'Маршрут' },
+  ];
 
-  let fromId = DEFAULT_FROM;
-  let toId = null;
-  let route = null;
+  let tab = 'map';
   let searchQuery = '';
-  let driving = false;
-  let navStep = 0;
-  let picking = null; // 'from' | 'to' | null
-  let inputMode = 'search'; // 'search' | 'coords'
-  let coordLat = '';
-  let coordLon = '';
+  let placesQuery = '';
+  let showGrid = false;
+  let selectedId = null;
+  let sheetOpen = false;
+  let route = null;
+  let coordCol = 'А';
+  let coordRow = '50';
+  let coordStatus = ''; // idle | building | fail | hint | success
+  let coordMessage = '';
+  let revealOpen = false;
+  let adminOpen = false;
+  let progress = loadProgress();
 
   function esc(text) {
     return String(text ?? '')
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
-  function placeLabel(p) {
-    if (!p) return '';
-    if (p.sub && p.type !== 'coord') return `${p.name} — ${p.sub}`;
-    return p.name;
-  }
-
-  function placeSubline(p) {
-    if (!p) return '';
-    const geo = MapsData.getPlaceCoords(p);
-    if (!geo) return p.sub || '';
-    return MapsData.formatCoords(geo.lat, geo.lon);
-  }
-
-  function formatDuration(min) {
-    const m = Math.round(min);
-    if (m < 60) return `${m} мин.`;
-    const h = Math.floor(m / 60);
-    const rest = m % 60;
-    return rest ? `${h} ч. ${rest} мин.` : `${h} ч.`;
-  }
-
-  function formatDurationShort(min) {
-    const m = Math.round(min);
-    if (m < 60) return `${m} мин`;
-    const h = Math.floor(m / 60);
-    const rest = m % 60;
-    return rest ? `${h} ч ${rest}` : `${h} ч`;
-  }
-
-  function viaLabel(r) {
-    if (!r || r.path.length < 2) return '';
-    const idx = Math.min(1, r.path.length - 2);
-    const via = MapsData.findPlace(r.path[idx]);
-    return via ? `через ${via.name}` : '';
-  }
-
-  function routePoints(path) {
-    return path.map(id => MapsData.findPlace(id)).filter(Boolean);
-  }
-
-  function displayPathPoints() {
-    if (route?.displayPath?.length) return route.displayPath;
-    if (route?.path) return routePoints(route.path).map(p => ({ x: p.x, y: p.y, name: p.name }));
-    return [];
-  }
-
-  function boundsForPoints(pts, pad = 8) {
-    const xs = pts.map(p => p.x);
-    const ys = pts.map(p => p.y);
-    return {
-      minX: Math.min(...xs) - pad,
-      minY: Math.min(...ys) - pad,
-      maxX: Math.max(...xs) + pad,
-      maxY: Math.max(...ys) + pad,
-    };
-  }
-
-  function viewBoxFromBounds(b) {
-    return `${b.minX} ${b.minY} ${b.maxX - b.minX} ${b.maxY - b.minY}`;
-  }
-
-  function routeMidpoint() {
-    const pts = displayPathPoints();
-    if (!pts.length) return { x: 50, y: 50 };
-    const mid = pts[Math.floor(pts.length / 2)];
-    return { x: mid.x, y: mid.y };
-  }
-
-  function navInstruction() {
-    if (!route) return null;
-    const path = route.path;
-    if (navStep >= path.length - 1) {
-      const dest = MapsData.findPlace(route.toId || toId);
+  function loadProgress() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const data = raw ? JSON.parse(raw) : {};
       return {
-        main: 'Вы прибыли',
-        sub: dest ? placeLabel(dest) : '',
-        next: null,
+        attempts: Number(data.attempts) || 0,
+        solved: Boolean(data.solved),
+        lastRoute: data.lastRoute || null,
       };
+    } catch {
+      return { attempts: 0, solved: false, lastRoute: null };
     }
-    const next = MapsData.findPlace(path[navStep + 1]);
-    const after = navStep + 2 < path.length ? MapsData.findPlace(path[navStep + 2]) : null;
-    return {
-      main: 'в сторону',
-      sub: next ? next.name : '',
-      next: after ? { text: after.name, turn: 'left' } : null,
-    };
   }
 
-  function renderMapSvg(opts = {}) {
-    const { path = null, dotted = true, showBubble = false, showPin = false } = opts;
-    const displayPts = path && route?.displayPath?.length
-      ? route.displayPath
-      : (path ? routePoints(path).map(p => ({ x: p.x, y: p.y, name: p.name })) : MapsData.MAP_PLACES.filter(p => p.type !== 'lake'));
-    const bounds = boundsForPoints(displayPts, path ? 10 : 6);
-    const vb = viewBoxFromBounds(bounds);
+  function saveProgress() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      attempts: progress.attempts,
+      solved: progress.solved,
+      lastRoute: progress.lastRoute,
+    }));
+  }
 
-    const roads = MapsData.MAP_ROADS.map(([a, b]) => {
-      const p1 = MapsData.findPlace(a);
-      const p2 = MapsData.findPlace(b);
-      if (!p1 || !p2) return '';
-      return `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" class="gm-road"/>`;
-    }).join('');
+  function resetProgress() {
+    progress = { attempts: 0, solved: false, lastRoute: null };
+    saveProgress();
+    route = null;
+    revealOpen = false;
+    coordStatus = '';
+    coordMessage = '';
+    selectedId = null;
+  }
+
+  function cfg() {
+    return MapsData.CONFIG;
+  }
+
+  function placesVisible() {
+    const list = MapsData.publicPlaces();
+    if (progress.solved) {
+      const target = MapsData.getTargetPlace();
+      if (!list.some(p => p.id === target.id)) list.push(target);
+    }
+    return list;
+  }
+
+  function findAny(id) {
+    if (id === 'target-house') return MapsData.getTargetPlace();
+    return MapsData.findPlace(id);
+  }
+
+  function youAreHere() {
+    return MapsData.publicPlaces().find(p => p.youAreHere) || MapsData.findPlace('bureau');
+  }
+
+  /* ——— SVG map (фотореалистичная спутниковая подложка) ——— */
+  function pinTone(p) {
+    if (p.youAreHere) return 'here';
+    if (p.id === 'target-house' || p.cat === 'target') return 'target';
+    if (p.cat === 'police') return 'police';
+    if (p.cat === 'medical') return 'hospital';
+    if (p.cat === 'shop') return 'shop';
+    if (p.cat === 'transport') return 'transit';
+    if (p.cat === 'park' || p.cat === 'sport') return 'park';
+    if (p.cat === 'cafe' || p.cat === 'hotel') return 'shop';
+    if (p.cat === 'culture' || p.cat === 'education') return 'place';
+    return 'place';
+  }
+
+  function renderSvg() {
+    const places = placesVisible().filter(p => {
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      return `${p.name} ${p.addr}`.toLowerCase().includes(q);
+    });
+
+    let grid = '';
+    if (showGrid) {
+      const cols = MapsData.COLS;
+      const rows = MapsData.ROWS;
+      const pad = MapsData.VIEW.pad;
+      const uw = 100 - pad * 2;
+      const uh = 100 - pad * 2;
+      cols.forEach((c, i) => {
+        const x = pad + ((i + 0.5) / cols.length) * uw;
+        grid += `<line x1="${x}" y1="${pad}" x2="${x}" y2="${100 - pad}" class="nav-grid-line"/>`;
+        grid += `<text x="${x}" y="${pad - 1.2}" class="nav-grid-label" text-anchor="middle">${c}</text>`;
+      });
+      rows.forEach((r, i) => {
+        const y = pad + ((i + 0.5) / rows.length) * uh;
+        grid += `<line x1="${pad}" y1="${y}" x2="${100 - pad}" y2="${y}" class="nav-grid-line"/>`;
+        grid += `<text x="${pad - 1.2}" y="${y + 1}" class="nav-grid-label" text-anchor="end">${r}</text>`;
+      });
+    }
 
     let routeLine = '';
-    if (path && displayPts.length > 1) {
-      const d = displayPts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-      routeLine = `<path d="${d}" class="gm-route${dotted ? ' dotted' : ''}"/>`;
+    if (route?.displayPath?.length > 1) {
+      const d = route.displayPath.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+      routeLine = `
+        <path d="${d}" class="nav-route-casing" pathLength="100"/>
+        <path d="${d}" class="nav-route-line" pathLength="100"/>
+      `;
     }
 
-    const dest = toId ? MapsData.findPlace(toId) : null;
-    const from = MapsData.findPlace(fromId);
-    const mid = path ? routeMidpoint() : null;
-    const bubble = showBubble && route
-      ? `<g class="gm-time-bubble" transform="translate(${mid.x} ${mid.y - 4})">
-          <rect x="-14" y="-5" width="28" height="10" rx="5" class="gm-bubble-bg"/>
-          <text class="gm-bubble-text" text-anchor="middle" y="1.5">${formatDurationShort(route.min)}</text>
-        </g>`
-      : '';
-
-    const destPin = showPin && dest
-      ? `<g class="gm-dest-pin" transform="translate(${dest.x} ${dest.y})">
-          <path d="M0 -6 C-3.5 -6 -6 -3.5 -6 0 C-6 4 0 9 0 9 C0 9 6 4 6 0 C6 -3.5 3.5 -6 0 -6 Z" class="gm-pin-shape"/>
-          <circle r="2" cy="-1" class="gm-pin-hole"/>
-        </g>`
-      : '';
-
-    const fromPin = from && path
-      ? `<g class="gm-from-pin" transform="translate(${from.x} ${from.y})">
-          <circle r="2.5" class="gm-from-dot"/>
-        </g>`
-      : '';
-
-  const coordPins = [from, dest].filter(p => p?.type === 'coord').map(p => `
-      <g class="gm-coord-pin" transform="translate(${p.x} ${p.y})">
-        <circle r="2.2" class="gm-coord-dot"/>
-      </g>
-    `).join('');
+    const pins = places.map(p => {
+      const tone = pinTone(p);
+      const active = selectedId === p.id ? ' active' : '';
+      if (p.youAreHere) {
+        return `
+          <g class="nav-pin here${active}" data-pin="${esc(p.id)}" transform="translate(${p.x} ${p.y})">
+            <circle r="2.8" class="nav-here-pulse"/>
+            <circle r="1.55" class="nav-here-ring"/>
+            <circle r="0.85" class="nav-here-dot"/>
+          </g>
+        `;
+      }
+      return `
+        <g class="nav-pin pin-${tone}${active}" data-pin="${esc(p.id)}" transform="translate(${p.x} ${p.y})">
+          <path class="nav-pin-body" d="M0,-3.2 C-1.6,-3.2 -2.55,-2.1 -2.55,-0.75 C-2.55,0.85 0,3.3 0,3.3 S2.55,0.85 2.55,-0.75 C2.55,-2.1 1.6,-3.2 0,-3.2 Z"/>
+          <circle class="nav-pin-hole" cx="0" cy="-0.95" r="0.95"/>
+          <text y="-0.7" text-anchor="middle" class="nav-pin-icon">${p.icon}</text>
+        </g>
+      `;
+    }).join('');
 
     return `
-      <svg class="gm-map-svg" viewBox="${vb}" preserveAspectRatio="xMidYMid meet">
-        <rect class="gm-map-tile" x="${bounds.minX}" y="${bounds.minY}" width="${bounds.maxX - bounds.minX}" height="${bounds.maxY - bounds.minY}"/>
-        <g class="gm-roads">${roads}</g>
+      <svg class="nav-map-svg photo-map" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <filter id="navSoftShadow" x="-40%" y="-40%" width="180%" height="180%">
+            <feDropShadow dx="0" dy="0.4" stdDeviation="0.45" flood-color="#000" flood-opacity="0.45"/>
+          </filter>
+          <radialGradient id="navPhotoVignette" cx="50%" cy="45%" r="72%">
+            <stop offset="60%" stop-color="rgba(0,0,0,0)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,0.28)"/>
+          </radialGradient>
+        </defs>
+        <image
+          class="nav-aerial"
+          href="./assets/maps/novograd-aerial.jpg"
+          xlink:href="./assets/maps/novograd-aerial.jpg"
+          x="0" y="0" width="100" height="100"
+          preserveAspectRatio="xMidYMid slice"
+        />
+        <rect x="0" y="0" width="100" height="100" fill="url(#navPhotoVignette)" pointer-events="none"/>
+        <g class="nav-grid">${grid}</g>
         ${routeLine}
-        ${fromPin}
-        ${coordPins}
-        ${bubble}
-        ${destPin}
+        <g class="nav-pins">${pins}</g>
+        <g class="nav-compass" transform="translate(91 9)">
+          <circle r="4" class="nav-compass-disc"/>
+          <polygon points="0,-2.8 1.2,2.1 -1.2,2.1" class="nav-compass-n"/>
+          <text y="5.2" text-anchor="middle" class="nav-compass-label">С</text>
+        </g>
       </svg>
     `;
   }
 
-  function renderDriveScene() {
+  function sheetHtml() {
+    if (!sheetOpen || !selectedId) return '';
+    const p = findAny(selectedId);
+    if (!p) return '';
     return `
-      <div class="gm-drive-scene">
-        <div class="gm-drive-map">${renderMapSvg({ path: route?.path, dotted: true, showBubble: true })}</div>
-        <div class="gm-drive-tilt"></div>
-        <img class="gm-drive-car" src="${NAV_CAR}" alt="" draggable="false">
-        <button type="button" class="gm-whereami">ГДЕ Я?</button>
-        <div class="gm-fabs">
-          <button type="button" class="gm-fab" aria-label="Поиск">⌕</button>
-          <button type="button" class="gm-fab" aria-label="Звук">🔊</button>
-          <button type="button" class="gm-fab" aria-label="Компас">◎</button>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderBlueHeader(from, to) {
-    return `
-      <div class="gm-header">
-        <button type="button" class="gm-header-back" data-maps-back aria-label="Назад">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-        </button>
-        <div class="gm-destinations">
-          <button type="button" class="gm-dest-row${picking === 'from' ? ' active' : ''}" data-pick="from">
-            <span class="gm-dot from"></span>
-            <span class="gm-dest-text">
-              <span class="gm-dest-name">${esc(from ? placeLabel(from) : 'Моё местоположение')}</span>
-              ${from ? `<span class="gm-dest-coords">${esc(placeSubline(from))}</span>` : ''}
-            </span>
-          </button>
-          <button type="button" class="gm-dest-row${picking === 'to' ? ' active' : ''}" data-pick="to">
-            <span class="gm-dot to"></span>
-            <span class="gm-dest-text">
-              <span class="gm-dest-name">${esc(to ? placeLabel(to) : 'Куда едем?')}</span>
-              ${to ? `<span class="gm-dest-coords">${esc(placeSubline(to))}</span>` : ''}
-            </span>
-          </button>
-        </div>
-        <button type="button" class="gm-header-menu" aria-label="Меню">⋮</button>
-      </div>
-    `;
-  }
-
-  function renderModeTabs() {
-    const time = route ? formatDurationShort(route.min) : '—';
-    return `
-      <div class="gm-modes">
-        <button type="button" class="gm-mode active" aria-label="На машине">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
-          <span>${time}</span>
-        </button>
-        <button type="button" class="gm-mode" aria-label="Транспорт" disabled>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg>
-        </button>
-        <button type="button" class="gm-mode" aria-label="Пешком" disabled>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
-        </button>
-        <button type="button" class="gm-mode" aria-label="Велосипед" disabled>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM5 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5zm5.8-10l2.4-2.4 1.4 1.4-2.4 2.4-1.4-1.4zM19 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5z"/></svg>
-        </button>
-      </div>
-    `;
-  }
-
-  function renderNavBars(instr) {
-    if (!instr) return '';
-    return `
-      <div class="gm-nav-bar">
-        <div class="gm-nav-arrow">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)"/></svg>
-        </div>
-        <div class="gm-nav-main">
-          <div class="gm-nav-title">${esc(instr.main)}</div>
-          ${instr.sub ? `<div class="gm-nav-sub">${esc(instr.sub)}</div>` : ''}
-        </div>
-        <button type="button" class="gm-nav-mic" aria-label="Голос">🎤</button>
-      </div>
-      ${instr.next ? `
-        <div class="gm-nav-next">
-          <span class="gm-nav-next-label">Далее</span>
-          <span class="gm-nav-next-arrow">↰</span>
-          <span class="gm-nav-next-text">${esc(instr.next.text)}</span>
-        </div>
-      ` : ''}
-    `;
-  }
-
-  function renderRouteCard() {
-    if (!route) return '';
-    return `
-      <div class="gm-route-card">
-        <div class="gm-route-card-info">
-          <strong>${formatDuration(route.min)} (${route.km.toFixed(1).replace('.', ',')} км)</strong>
-          <span>${esc(viaLabel(route))}</span>
-        </div>
-        <button type="button" class="gm-start-btn" data-maps-start>НАЧАТЬ</button>
-      </div>
-    `;
-  }
-
-  function renderPickPanel() {
-    const geo = MapsData.MAP_GEO;
-    return `
-      <div class="gm-search-panel">
-        <div class="gm-pick-tabs">
-          <button type="button" class="gm-pick-tab${inputMode === 'search' ? ' active' : ''}" data-input-mode="search">Поиск</button>
-          <button type="button" class="gm-pick-tab${inputMode === 'coords' ? ' active' : ''}" data-input-mode="coords">Координаты</button>
-        </div>
-
-        ${inputMode === 'search' ? `
-          <input type="search" class="maps-search" placeholder="Населённый пункт или 56.81, 37.21" value="${esc(searchQuery)}" id="mapsSearchInput" autofocus>
-          <div class="maps-list">${renderList()}</div>
-        ` : `
-          <div class="gm-coord-form">
-            <p class="gm-coord-hint">Диапазон: ${geo.latMin}–${geo.latMax}° с.ш., ${geo.lonMin}–${geo.lonMax}° в.д.</p>
-            <div class="gm-coord-row">
-              <label>Широта</label>
-              <input type="text" inputmode="decimal" id="coordLat" placeholder="56.81234" value="${esc(coordLat)}">
-            </div>
-            <div class="gm-coord-row">
-              <label>Долгота</label>
-              <input type="text" inputmode="decimal" id="coordLon" placeholder="37.21456" value="${esc(coordLon)}">
-            </div>
-            <div class="gm-coord-row full">
-              <label>Или одной строкой</label>
-              <input type="text" inputmode="decimal" id="coordCombined" placeholder="56.81234, 37.21456">
-            </div>
-            <button type="button" class="maps-go-btn gm-coord-apply" data-apply-coords>Применить координаты</button>
+      <div class="nav-sheet">
+        <div class="nav-sheet-handle"></div>
+        <div class="nav-sheet-card">
+          <div class="nav-sheet-icon">${p.icon}</div>
+          <div class="nav-sheet-meta">
+            <strong>${esc(p.name)}</strong>
+            <span>${esc(p.addr)}</span>
+            <small>${esc(p.cell)} · ${esc(p.catLabel)}</small>
           </div>
-        `}
+        </div>
+        <button type="button" class="nav-primary-btn" data-route-here="${esc(p.id)}">Маршрут сюда</button>
+        <button type="button" class="nav-ghost-btn" data-close-sheet>Закрыть</button>
       </div>
     `;
   }
 
-  function renderList() {
-    const q = searchQuery.trim();
-    const coord = MapsData.parseCoordinates(q);
-    let extra = '';
-    if (coord) {
-      extra = `
-        <button type="button" class="maps-list-item coord-suggest" data-apply-coord="${coord.lat},${coord.lon}">
-          <span class="maps-list-icon">📌</span>
-          <span class="maps-list-text">
-            <strong>${esc(MapsData.formatCoords(coord.lat, coord.lon))}</strong>
-            <small>Использовать эти координаты</small>
+  function mapTab() {
+    return `
+      <div class="nav-map-wrap">
+        ${renderSvg()}
+        <div class="nav-map-overlays">
+          <input type="search" class="nav-search" id="navMapSearch" placeholder="Поиск места…" value="${esc(searchQuery)}" />
+          <div class="nav-map-tools">
+            <button type="button" class="nav-tool-btn${showGrid ? ' on' : ''}" data-toggle-grid>Сетка</button>
+            <button type="button" class="nav-tool-btn" data-go-here>Я здесь</button>
+          </div>
+          <button type="button" class="nav-fab" data-goto-coords>Ввести координаты</button>
+        </div>
+        ${sheetHtml()}
+      </div>
+    `;
+  }
+
+  function placesTab() {
+    const groups = MapsData.placesByCategory();
+    const q = placesQuery.trim().toLowerCase();
+    let html = '';
+    Object.keys(groups).forEach(cat => {
+      const items = groups[cat].filter(p => {
+        if (!q) return true;
+        return `${p.name} ${p.addr} ${p.cell}`.toLowerCase().includes(q);
+      });
+      if (!items.length) return;
+      html += `<div class="nav-cat-title">${esc(cat)}</div>`;
+      html += items.map(p => `
+        <button type="button" class="nav-place-row" data-open-place="${esc(p.id)}">
+          <span class="nav-place-ico">${p.icon}</span>
+          <span class="nav-place-text">
+            <strong>${esc(p.name)}</strong>
+            <small>${esc(p.addr)}</small>
           </span>
+          <span class="nav-place-cell">${esc(p.cell)}</span>
         </button>
-      `;
+      `).join('');
+    });
+    if (progress.solved) {
+      const t = MapsData.getTargetPlace();
+      if (!q || `${t.name} ${t.addr}`.toLowerCase().includes(q)) {
+        html += `<div class="nav-cat-title">Цель</div>`;
+        html += `
+          <button type="button" class="nav-place-row target" data-open-place="${esc(t.id)}">
+            <span class="nav-place-ico">${t.icon}</span>
+            <span class="nav-place-text">
+              <strong>${esc(t.name)}</strong>
+              <small>${esc(t.addr)}</small>
+            </span>
+            <span class="nav-place-cell">${esc(t.cell)}</span>
+          </button>`;
+      }
+    }
+    return `
+      <div class="nav-scroll">
+        <input type="search" class="nav-search inline" id="navPlacesSearch" placeholder="Название или адрес…" value="${esc(placesQuery)}" />
+        <div class="nav-places-list">${html || '<p class="nav-empty">Ничего не найдено</p>'}</div>
+      </div>
+    `;
+  }
+
+  function coordsTab() {
+    const cols = MapsData.COLS.map(c =>
+      `<option value="${c}" ${c === coordCol ? 'selected' : ''}>${c}</option>`
+    ).join('');
+    const rows = MapsData.ROWS.map(r =>
+      `<option value="${r}" ${String(r) === String(coordRow) ? 'selected' : ''}>${r}</option>`
+    ).join('');
+
+    let result = '';
+    if (coordStatus === 'building') {
+      result = `<div class="nav-coord-result building">Прокладываю маршрут…</div>`;
+    } else if (coordStatus === 'fail') {
+      result = `<div class="nav-coord-result fail">${esc(coordMessage || cfg().onFail)}</div>`;
+    } else if (coordStatus === 'hint') {
+      result = `<div class="nav-coord-result hint">${esc(coordMessage)}</div>`;
+    } else if (coordStatus === 'success') {
+      result = `<div class="nav-coord-result ok">Точка найдена</div>`;
+    } else {
+      result = `<div class="nav-coord-result idle">Введите столбец и строку сетки (пример: Ж-70)</div>`;
     }
 
-    const items = MapsData.searchPlaces(searchQuery);
-    if (!items.length && !extra) return '<p class="maps-hint">Ничего не найдено</p>';
-    return extra + items.map(p => {
-      const geo = MapsData.getPlaceCoords(p);
+    return `
+      <div class="nav-scroll nav-coords">
+        <p class="nav-coords-lead">Координаты по сетке буклета: столбец (А–Р) и строка (10–110).</p>
+        <div class="nav-coord-form">
+          <label>
+            <span>Столбец</span>
+            <select id="navCoordCol">${cols}</select>
+          </label>
+          <label>
+            <span>Строка</span>
+            <select id="navCoordRow">${rows}</select>
+          </label>
+        </div>
+        <button type="button" class="nav-primary-btn" data-build-coords>Проложить маршрут</button>
+        ${result}
+        <p class="nav-attempts">Попыток: ${progress.attempts}</p>
+      </div>
+    `;
+  }
+
+  function routeTab() {
+    const r = route || progress.lastRoute;
+    if (!r) {
       return `
-        <button type="button" class="maps-list-item" data-place="${p.id}">
-          <span class="maps-list-icon">${p.type === 'city' ? '🏙' : p.type === 'poi' ? '📍' : '🏘'}</span>
-          <span class="maps-list-text">
-            <strong>${esc(p.name)}</strong>
-            <small>${esc(geo ? MapsData.formatCoords(geo.lat, geo.lon) : (p.sub || ''))}</small>
-          </span>
-        </button>
+        <div class="nav-scroll">
+          <div class="nav-empty-card">
+            <strong>Маршрут ещё не построен</strong>
+            <p>Выберите место на карте или во вкладке «Места», либо введите координаты.</p>
+          </div>
+        </div>
       `;
-    }).join('');
+    }
+    const fromName = r.from?.name || findAny(r.fromId)?.name || 'A';
+    const toName = r.to?.name || findAny(r.toId)?.name || 'B';
+    return `
+      <div class="nav-scroll">
+        <div class="nav-route-card">
+          <div class="nav-route-row"><span>Откуда</span><strong>${esc(fromName)}</strong></div>
+          <div class="nav-route-row"><span>Куда</span><strong>${esc(toName)}</strong></div>
+          <div class="nav-route-stats">
+            <div><b>${esc(String(r.km).replace('.', ','))} км</b><small>расстояние</small></div>
+            <div><b>${r.min} мин</b><small>время</small></div>
+            <div><b>${esc(r.toCell || r.fromCell || '—')}</b><small>ячейка</small></div>
+          </div>
+          <button type="button" class="nav-primary-btn" data-show-on-map>Показать на карте</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function revealHtml() {
+    if (!revealOpen) return '';
+    return `
+      <div class="nav-reveal">
+        <div class="nav-reveal-card">
+          <div class="nav-reveal-badge">На месте</div>
+          <h2>${esc(cfg().target.label)}</h2>
+          <p>У воды найдено тело — <strong>Вероника</strong>. Она мертва задолго до этой ночи. Дом Сергей знал по риелторской работе.</p>
+          <p class="nav-reveal-guard">По убийству Анны это не отвечает ничего. Убийца Анны по-прежнему неизвестен.</p>
+          <div class="nav-sms">
+            <div class="nav-sms-from">Шеф</div>
+            <div class="nav-sms-text">Дело собрали не в ту историю. Открываю материалы второй главы.</div>
+          </div>
+          <button type="button" class="nav-primary-btn" data-go-chapter2>Перейти к главе 2</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function adminHtml() {
+    if (!adminOpen) return '';
+    const answers = (cfg().target.answer || []).join(', ');
+    return `
+      <div class="nav-admin">
+        <div class="nav-admin-card">
+          <h3>Админка навигатора</h3>
+          <label>Правильные координаты
+            <input type="text" id="navAdminAnswers" value="${esc(answers)}" />
+          </label>
+          <label>Подпись цели
+            <input type="text" id="navAdminLabel" value="${esc(cfg().target.label)}" />
+          </label>
+          <div class="nav-admin-row">
+            <button type="button" class="nav-tool-btn" data-admin-ch="1">Глава 1</button>
+            <button type="button" class="nav-tool-btn" data-admin-ch="2">Глава 2</button>
+          </div>
+          <button type="button" class="nav-ghost-btn" data-admin-reset>Сброс прогресса</button>
+          <button type="button" class="nav-primary-btn" data-admin-save>Сохранить</button>
+          <button type="button" class="nav-ghost-btn" data-admin-close>Закрыть</button>
+          <p class="nav-admin-note">Канон: Виктора нет на карте; цель скрыта до разгадки; тело Вероники — антиразгадка по Анне. Значение координат — плейсхолдер.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function tabBar() {
+    return `
+      <nav class="nav-tabs">
+        ${TABS.map(t => `
+          <button type="button" class="nav-tab${tab === t.id ? ' active' : ''}" data-nav-tab="${t.id}">${t.label}</button>
+        `).join('')}
+      </nav>
+    `;
   }
 
   function render() {
     const screen = document.getElementById('mapsApp');
     if (!screen) return;
 
-    const from = MapsData.findPlace(fromId);
-    const to = toId ? MapsData.findPlace(toId) : null;
-    const instr = driving && route ? navInstruction() : null;
-    const showRoute = Boolean(route);
-    const showPick = picking && !driving;
+    let body = '';
+    if (tab === 'map') body = mapTab();
+    else if (tab === 'places') body = placesTab();
+    else if (tab === 'coords') body = coordsTab();
+    else body = routeTab();
 
-    if (driving) {
-      screen.innerHTML = `
-        <div class="maps-app gm-app driving">
-          ${renderNavBars(instr)}
-          ${renderDriveScene()}
-          <button type="button" class="gm-exit-drive" data-maps-stop>✕</button>
-        </div>
-      `;
-    } else if (showRoute) {
-      screen.innerHTML = `
-        <div class="maps-app gm-app route">
-          ${renderBlueHeader(from, to)}
-          ${renderModeTabs()}
-          <div class="gm-map-area">
-            ${renderMapSvg({ path: route.path, dotted: true, showBubble: true, showPin: true })}
-            <button type="button" class="gm-my-location" aria-label="Моё местоположение">◎</button>
-            <button type="button" class="gm-nav-fab" data-maps-start aria-label="Навигация">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
-            </button>
-          </div>
-          ${renderRouteCard()}
-        </div>
-      `;
-    } else {
-      screen.innerHTML = `
-        <div class="maps-app gm-app search">
-          ${renderBlueHeader(from, to)}
-          ${to ? renderModeTabs() : ''}
-          <div class="gm-map-area${to ? '' : ' idle'}">
-            ${renderMapSvg({ path: null, dotted: false, showPin: Boolean(to) })}
-          </div>
-          ${showPick ? renderPickPanel() : (to ? `
-            <div class="gm-build-wrap">
-              <button type="button" class="maps-go-btn gm-build-btn" data-maps-route">Построить маршрут</button>
-            </div>
-          ` : `
-            <div class="gm-search-panel compact">
-              <p class="maps-hint">Нажмите поле «Куда едем?» — поиск или ввод координат</p>
-            </div>
-          `)}
-        </div>
-      `;
-    }
-
+    screen.innerHTML = `
+      <div class="nav-app">
+        <header class="nav-header">
+          <button type="button" class="nav-back" data-nav-back aria-label="Назад">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          </button>
+          <h1 data-nav-title>Навигатор</h1>
+          <span class="nav-header-spacer"></span>
+        </header>
+        <div class="nav-body">${body}</div>
+        ${tabBar()}
+        ${revealHtml()}
+        ${adminHtml()}
+      </div>
+    `;
     bind(screen);
   }
 
+  function buildRouteTo(toId) {
+    const from = youAreHere();
+    if (!from) return;
+    const built = MapsData.routeBetween(from.id, toId);
+    if (!built) return;
+    route = built;
+    progress.lastRoute = {
+      fromId: built.fromId,
+      toId: built.toId,
+      km: built.km,
+      min: built.min,
+      fromCell: built.fromCell,
+      toCell: built.toCell,
+      from: { name: built.from.name },
+      to: { name: built.to.name },
+      displayPath: built.displayPath,
+    };
+    saveProgress();
+    selectedId = toId;
+    sheetOpen = false;
+    tab = 'map';
+    render();
+  }
+
+  function tryCoords() {
+    const col = document.getElementById('navCoordCol')?.value || coordCol;
+    const row = document.getElementById('navCoordRow')?.value || coordRow;
+    coordCol = col;
+    coordRow = row;
+
+    coordStatus = 'building';
+    coordMessage = '';
+    render();
+
+    setTimeout(() => {
+      const ok = MapsData.isCorrectAnswer(col, row);
+      if (ok) {
+        progress.solved = true;
+        saveProgress();
+        const target = MapsData.getTargetPlace();
+        const from = youAreHere();
+        route = MapsData.routeBetween(from.id, target.id);
+        if (route) {
+          progress.lastRoute = {
+            fromId: route.fromId,
+            toId: route.toId,
+            km: route.km,
+            min: route.min,
+            fromCell: route.fromCell,
+            toCell: route.toCell,
+            from: { name: route.from.name },
+            to: { name: route.to.name },
+            displayPath: route.displayPath,
+          };
+          saveProgress();
+        }
+        coordStatus = 'success';
+        revealOpen = true;
+        selectedId = target.id;
+        tab = 'map';
+        showGrid = true;
+        render();
+        return;
+      }
+
+      progress.attempts += 1;
+      saveProgress();
+      if (progress.attempts >= cfg().hintAfter) {
+        coordStatus = 'hint';
+        coordMessage = `${cfg().onFail}\n${cfg().hintText}`;
+      } else {
+        coordStatus = 'fail';
+        coordMessage = cfg().onFail;
+      }
+      render();
+    }, 700);
+  }
+
+  function goChapter2() {
+    revealOpen = false;
+    try {
+      window.parent?.postMessage({ type: 'chapter', ch: 2 }, '*');
+      window.parent?.postMessage({ type: 'nav-event', event: 'reveal-veronika' }, '*');
+    } catch {}
+    if (window.goToStoryState) window.goToStoryState(2);
+    else if (window.StoryState) {
+      StoryState.setState(2);
+      if (typeof showScreen === 'function') showScreen('homeScreen');
+    }
+  }
+
   function bind(screen) {
-    screen.querySelector('[data-maps-back]')?.addEventListener('click', () => {
-      if (route) {
-        route = null;
-        driving = false;
-        picking = null;
+    screen.querySelector('[data-nav-back]')?.addEventListener('click', () => {
+      if (revealOpen) {
+        revealOpen = false;
         render();
         return;
       }
       if (typeof showScreen === 'function') showScreen('homeScreen');
     });
 
-    screen.querySelector('#mapsSearchInput')?.addEventListener('input', e => {
+    // long-press title → admin
+    const title = screen.querySelector('[data-nav-title]');
+    if (title) {
+      let timer = null;
+      const start = () => {
+        timer = setTimeout(() => {
+          adminOpen = true;
+          render();
+        }, 1200);
+      };
+      const clear = () => {
+        if (timer) clearTimeout(timer);
+        timer = null;
+      };
+      title.addEventListener('mousedown', start);
+      title.addEventListener('touchstart', start, { passive: true });
+      title.addEventListener('mouseup', clear);
+      title.addEventListener('mouseleave', clear);
+      title.addEventListener('touchend', clear);
+      title.addEventListener('touchcancel', clear);
+    }
+
+    screen.querySelectorAll('[data-nav-tab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tab = btn.dataset.navTab;
+        sheetOpen = false;
+        render();
+      });
+    });
+
+    screen.querySelector('#navMapSearch')?.addEventListener('input', e => {
       searchQuery = e.target.value;
-      const list = screen.querySelector('.maps-list');
-      if (list) list.innerHTML = renderList();
-      bindList(screen);
-    });
-
-    screen.querySelectorAll('[data-input-mode]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        inputMode = btn.dataset.inputMode;
+      const wrap = screen.querySelector('.nav-map-wrap');
+      if (wrap) {
+        const svgHost = wrap.querySelector('.nav-map-svg')?.parentElement;
+        // re-render map pins cheaply via full render
         render();
-      });
-    });
-
-    screen.querySelector('#coordLat')?.addEventListener('input', e => { coordLat = e.target.value; });
-    screen.querySelector('#coordLon')?.addEventListener('input', e => { coordLon = e.target.value; });
-
-    screen.querySelector('[data-apply-coords]')?.addEventListener('click', () => {
-      const combined = screen.querySelector('#coordCombined')?.value;
-      applyCoordinates(combined || `${coordLat}, ${coordLon}`);
-    });
-
-    screen.querySelector('#coordCombined')?.addEventListener('keydown', e => {
-      if (e.key === 'Enter') applyCoordinates(e.target.value);
-    });
-
-    screen.querySelectorAll('[data-pick]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        picking = btn.dataset.pick;
-        searchQuery = '';
-        inputMode = 'search';
-        const target = picking === 'from' ? from : to;
-        if (target?.type === 'coord') {
-          coordLat = String(target.lat);
-          coordLon = String(target.lon);
-        } else {
-          coordLat = '';
-          coordLon = '';
+        const input = document.getElementById('navMapSearch');
+        if (input) {
+          input.focus();
+          input.value = searchQuery;
+          try { input.setSelectionRange(searchQuery.length, searchQuery.length); } catch {}
         }
+      }
+    });
+
+    screen.querySelector('[data-toggle-grid]')?.addEventListener('click', () => {
+      showGrid = !showGrid;
+      render();
+    });
+
+    screen.querySelector('[data-go-here]')?.addEventListener('click', () => {
+      const here = youAreHere();
+      if (!here) return;
+      selectedId = here.id;
+      sheetOpen = true;
+      searchQuery = '';
+      render();
+    });
+
+    screen.querySelector('[data-goto-coords]')?.addEventListener('click', () => {
+      tab = 'coords';
+      render();
+    });
+
+    screen.querySelectorAll('[data-pin]').forEach(g => {
+      g.addEventListener('click', e => {
+        e.stopPropagation();
+        selectedId = g.getAttribute('data-pin');
+        sheetOpen = true;
         render();
       });
     });
 
-    bindList(screen);
-
-    screen.querySelector('[data-maps-route]')?.addEventListener('click', buildRoute);
-    screen.querySelectorAll('[data-maps-start]').forEach(btn => {
-      btn.addEventListener('click', startDriving);
+    screen.querySelector('[data-close-sheet]')?.addEventListener('click', () => {
+      sheetOpen = false;
+      render();
     });
-    screen.querySelector('[data-maps-stop]')?.addEventListener('click', () => {
-      driving = false;
-      navStep = 0;
+
+    screen.querySelector('[data-route-here]')?.addEventListener('click', e => {
+      const id = e.currentTarget.getAttribute('data-route-here');
+      buildRouteTo(id);
+    });
+
+    screen.querySelector('#navPlacesSearch')?.addEventListener('input', e => {
+      placesQuery = e.target.value;
+      render();
+      const input = document.getElementById('navPlacesSearch');
+      if (input) {
+        input.focus();
+        input.value = placesQuery;
+        try { input.setSelectionRange(placesQuery.length, placesQuery.length); } catch {}
+      }
+    });
+
+    screen.querySelectorAll('[data-open-place]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedId = btn.dataset.openPlace;
+        sheetOpen = true;
+        tab = 'map';
+        render();
+      });
+    });
+
+    screen.querySelector('#navCoordCol')?.addEventListener('change', e => { coordCol = e.target.value; });
+    screen.querySelector('#navCoordRow')?.addEventListener('change', e => { coordRow = e.target.value; });
+    screen.querySelector('[data-build-coords]')?.addEventListener('click', tryCoords);
+
+    screen.querySelector('[data-show-on-map]')?.addEventListener('click', () => {
+      tab = 'map';
+      render();
+    });
+
+    screen.querySelector('[data-go-chapter2]')?.addEventListener('click', goChapter2);
+
+    // admin
+    screen.querySelector('[data-admin-close]')?.addEventListener('click', () => {
+      adminOpen = false;
+      render();
+    });
+    screen.querySelector('[data-admin-reset]')?.addEventListener('click', () => {
+      resetProgress();
+      adminOpen = false;
+      render();
+    });
+    screen.querySelectorAll('[data-admin-ch]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ch = Number(btn.dataset.adminCh);
+        if (window.StoryState) StoryState.setState(ch);
+        if (ch === 1) resetProgress();
+        adminOpen = false;
+        render();
+      });
+    });
+    screen.querySelector('[data-admin-save]')?.addEventListener('click', () => {
+      const answers = (document.getElementById('navAdminAnswers')?.value || '')
+        .split(/[,;]/)
+        .map(s => s.trim())
+        .filter(Boolean);
+      const label = document.getElementById('navAdminLabel')?.value?.trim();
+      if (answers.length) MapsData.CONFIG.target.answer = answers;
+      if (label) MapsData.CONFIG.target.label = label;
+      // sync first answer into col/row if parseable
+      const first = MapsData.normalizeCell(answers[0] || '');
+      if (first) {
+        MapsData.CONFIG.target.col = first.col;
+        MapsData.CONFIG.target.row = first.row;
+      }
+      adminOpen = false;
       render();
     });
   }
 
-  function bindList(screen) {
-    screen.querySelectorAll('.maps-list-item[data-place]').forEach(btn => {
-      btn.onclick = () => selectPlace(btn.dataset.place);
-    });
-    screen.querySelectorAll('[data-apply-coord]').forEach(btn => {
-      btn.onclick = () => {
-        const [lat, lon] = btn.dataset.applyCoord.split(',').map(Number);
-        applyCoordinates(`${lat}, ${lon}`);
-      };
-    });
-  }
-
-  function applyCoordinates(text) {
-    const parsed = MapsData.parseCoordinates(text);
-    if (!parsed) {
-      alert('Неверный формат координат.\nПример: 56.81234, 37.21456');
-      return;
-    }
-
-    const point = MapsData.registerCustomPoint(parsed.lat, parsed.lon);
-    coordLat = String(parsed.lat);
-    coordLon = String(parsed.lon);
-
-    if (picking === 'from') {
-      fromId = point.id;
-      if (toId === point.id) toId = null;
-    } else {
-      toId = point.id;
-      if (fromId === point.id) fromId = DEFAULT_FROM;
-    }
-
-    picking = null;
-    route = null;
-    driving = false;
-    searchQuery = MapsData.formatCoords(parsed.lat, parsed.lon);
-    render();
-  }
-
-  function selectPlace(id) {
-    const place = MapsData.findPlace(id);
-    if (!place || place.type === 'lake') return;
-
-    if (picking === 'from') {
-      fromId = id;
-      if (toId === id) toId = null;
-    } else {
-      toId = id;
-      if (fromId === id) fromId = DEFAULT_FROM;
-    }
-    picking = null;
-    route = null;
-    driving = false;
-    searchQuery = place.name;
-    render();
-  }
-
-  function buildRoute() {
-    if (!fromId || !toId) return;
-    route = MapsData.findRouteResolved(fromId, toId);
-    if (!route) {
-      alert('Маршрут по дорогам не найден');
-      return;
-    }
-    driving = false;
-    navStep = 0;
-    picking = null;
-    render();
-  }
-
-  function startDriving() {
-    if (!route) return;
-    driving = true;
-    navStep = 0;
-    picking = null;
-    render();
-  }
-
   function open(opts = {}) {
-    fromId = opts.from || DEFAULT_FROM;
-    toId = opts.to || null;
-    route = null;
-    driving = false;
-    navStep = 0;
-    picking = null;
-    inputMode = 'search';
-    coordLat = '';
-    coordLon = '';
-    searchQuery = opts.query || '';
+    progress = loadProgress();
+    tab = opts.tab || 'map';
+    searchQuery = '';
+    placesQuery = '';
+    showGrid = false;
+    selectedId = null;
+    sheetOpen = false;
+    coordStatus = '';
+    coordMessage = '';
+    revealOpen = Boolean(progress.solved && opts.reveal);
+    adminOpen = /[?&]admin=1(?:&|$)/.test(location.search);
+    if (progress.lastRoute && !route) {
+      route = progress.lastRoute;
+    }
     render();
-    if (toId) buildRoute();
   }
 
-  window.MapsApp = { open, render };
+  window.MapsApp = { open, render, resetProgress };
 })();

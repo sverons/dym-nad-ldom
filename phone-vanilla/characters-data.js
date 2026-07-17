@@ -393,98 +393,16 @@ function enrichGibddCar(car) {
 }
 
 function buildMainPhoneData() {
+  // По сюжету телефон принадлежит игрокам: единственный контакт — адвокат Железнов.
   const contacts = [
-    { id: 1, ...contactFromCharacter('anna', 'avatar-2') },
-    { id: 2, ...contactFromCharacter('igor', 'avatar-1') },
-    { id: 3, ...contactFromCharacter('veronika', 'avatar-3') },
-    { id: 4, ...contactFromCharacter('kristina', 'avatar-4') },
-    { id: 5, ...contactFromCharacter('likhachev', 'avatar-5') },
-    { id: 6, name: 'Адвокат Петрова', avatar: 'П', color: 'avatar-2', phone: '+7 (495) 212-88-00' },
+    { id: 1, name: 'Пётр Железнов', avatar: 'Ж', color: 'avatar-1', phone: '+7 (903) 118-25-00' },
   ];
 
   return {
     contacts,
-    chats: [
-      {
-        contactId: 1,
-        messages: [
-          { text: 'Завтра встреча с Тихоновым в 11:00. Не опаздывай.', sent: false, time: '08:12' },
-          { text: 'Понял. Буду.', sent: true, time: '08:14' },
-          { text: 'И ещё: Кристина просила документы по сделке до вечера.', sent: false, time: '08:16' },
-        ],
-        unread: false,
-      },
-      {
-        contactId: 2,
-        messages: [
-          { text: 'Сергей, в протоколе фото сгоревшей одежды. Рубашка похожа на твою «счастливую».', sent: false, time: 'Вчера' },
-          { text: 'Я сам разберусь. Пока не говори никому.', sent: true, time: 'Вчера' },
-        ],
-        unread: true,
-      },
-      {
-        contactId: 3,
-        messages: [
-          { text: 'Нам нужно поговорить сегодня. Это важно.', sent: false, time: '09:15' },
-        ],
-        unread: true,
-      },
-      {
-        contactId: 4,
-        messages: [
-          { text: 'Документы по сделке на столе. Подпишите до 18:00.', sent: false, time: '10:02' },
-          { text: 'Сделаю после суда.', sent: true, time: '10:05' },
-        ],
-        unread: false,
-      },
-      {
-        contactId: 6,
-        messages: [
-          { text: 'Петрова. Документы по делу передайте лично до среды.', sent: false, time: 'Пн' },
-        ],
-        unread: true,
-      },
-    ],
-    emails: [
-      {
-        id: 1,
-        from: 'Кристина Фомина',
-        email: 'fomina@zk-invest.ru',
-        subject: 'Документы по сделке',
-        preview: 'Анна просила передать до суда...',
-        time: '09:40',
-        unread: true,
-        body: 'Добрый день.\n\nПрикрепляю пакет по сделке с ProЗрение. Анна просила передать лично до суда.\n\nК. Фомина',
-        color: 'avatar-4',
-      },
-      {
-        id: 2,
-        from: 'Игорь Волков',
-        email: 'volkov.arch@mail.ru',
-        subject: 'Рубашка в материалах',
-        preview: 'Посмотрел фото из протокола...',
-        time: 'Вчера',
-        unread: true,
-        body: 'Сергей,\n\nПосмотрел фото сгоревшей одежды. Узнаю твою рубашку — но не уверен, что это про Анну.\n\nИгорь',
-        color: 'avatar-1',
-      },
-      {
-        id: 3,
-        from: 'Следственный комитет',
-        email: 'info@sk-rf.ru',
-        subject: 'Вызов на допрос',
-        preview: 'Направляем повестку...',
-        time: 'Пн',
-        unread: false,
-        body: 'Уважаемый Акунин С.П.\n\nНаправляем повестку на допрос по делу об убийстве Акуниной А.П.',
-        color: 'avatar-5',
-      },
-    ],
-    callHistory: [
-      { contactId: 3, type: 'missed', date: 'Сегодня, 09:10' },
-      { contactId: 2, type: 'incoming', date: 'Вчера, 21:30' },
-      { contactId: 6, type: 'incoming', date: 'Пн, 14:00' },
-    ],
+    chats: [],
+    emails: [],
+    callHistory: [],
     games: [
       { id: 'snake', title: 'Змейка', desc: 'Классическая аркада', emoji: '🐍', bg: '#1a472a' },
       { id: 'match3', title: '3 в ряд', desc: 'Скоро', emoji: '🔮', bg: '#3d1a47', disabled: true },

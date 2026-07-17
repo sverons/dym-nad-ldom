@@ -29,10 +29,24 @@ fi
 
 TEAM_ID="${DYM_IOS_TEAM:-}"
 if [[ -z "$TEAM_ID" ]]; then
+  TEAM_ID=$(grep -m1 'DEVELOPMENT_TEAM = ' "$ROOT/ios/DymNadLdom.xcodeproj/project.pbxproj" \
+    | sed -E 's/.*DEVELOPMENT_TEAM = ([A-Z0-9]+);.*/\1/' || true)
+fi
+if [[ -z "$TEAM_ID" || "$TEAM_ID" == "" ]]; then
   TEAM_ID=$(security find-identity -v -p codesigning 2>/dev/null \
     | grep "Apple Development" \
     | head -1 \
     | sed -E 's/.*\(([A-Z0-9]{10})\).*/\1/' || true)
+fi
+
+if ! xcrun devicectl list devices 2>/dev/null | grep -q "iPhone\|iPad"; then
+  if ! xcrun xctrace list devices 2>/dev/null | grep -E "^\S.*iPhone|^\S.*iPad" | grep -v Simulator | grep -q .; then
+    echo "⚠ Физический iPhone/iPad не подключён." >&2
+    echo "  Подключите устройство по USB, разблокируйте и нажмите «Доверять»." >&2
+    echo "  Xcode → Window → Devices and Simulators — устройство должно появиться." >&2
+    echo "  Затем снова: ./build-ipa.sh" >&2
+    echo "" >&2
+  fi
 fi
 
 echo "→ Синхронизация веб-приложения…"

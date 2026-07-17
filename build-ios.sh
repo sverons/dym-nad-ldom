@@ -45,7 +45,7 @@ else
     -project DymNadLdom.xcodeproj \
     -scheme "$SCHEME" \
     -configuration Debug \
-    -destination 'platform=iOS Simulator,name=iPhone 16' \
+    -destination 'platform=iOS Simulator,name=iPhone 17' \
     -derivedDataPath "$LINK/ios/build" \
     build
 

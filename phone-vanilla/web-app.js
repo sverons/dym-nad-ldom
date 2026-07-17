@@ -1,6 +1,5 @@
 const PHONE_WEB_URLS = {
   mail: { url: 'https://novogradmail.lovable.app', title: 'Почта' },
-  novagram: { url: 'https://novagram.ru', title: 'Novagram' },
 };
 
 function openWebApp(url, title) {

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ProЗрение — pro-zrenie.ru</title>
+<!--
+  Сайт клиники ProЗрение для встроенного браузера телефона.
+  Контент по канону / спецификации; правки M3 (Новоград, 831, pro-zrenie.ru, ЛО-52).
+-->
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root{
+    --teal:#0e7c86; --teal-d:#0a5b63; --teal-l:#e6f4f5;
+    --ink:#1c2b2d; --muted:#5f7376; --line:#dbe7e8; --bg:#f4f8f8; --white:#fff;
+  }
+  html,body{ height:100%; }
+  body{
+    font-family:-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--ink);
+  }
+  .site{ min-height:100%; display:flex; flex-direction:column; }
+  .site-head{ background:linear-gradient(135deg,var(--teal),var(--teal-d)); color:#fff; padding:16px; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .eye{ width:34px; height:34px; border-radius:50%; background:#fff;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .eye::before{ content:""; width:16px; height:16px; border-radius:50%;
+    background:radial-gradient(circle at 50% 50%,var(--teal-d) 0 5px,#fff 5px 7px,var(--teal) 7px); }
+  .brand b{ font-size:19px; letter-spacing:.3px; }
+  .brand b span{ color:#8fe3ea; }
+  .brand small{ display:block; font-size:11px; opacity:.85; font-weight:400; }
+  .menu{ display:flex; gap:4px; overflow-x:auto; background:var(--teal-d); padding:0 8px;
+    position:sticky; top:0; z-index:15; }
+  .menu button{ border:none; background:transparent; color:#cdeef1; font-size:13px;
+    padding:11px 12px; white-space:nowrap; cursor:pointer; border-bottom:3px solid transparent; }
+  .menu button.on{ color:#fff; border-bottom-color:#8fe3ea; font-weight:600; }
+  .page{ display:none; padding:16px; animation:fade .25s; }
+  .page.on{ display:block; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+  h1{ font-size:22px; color:var(--teal-d); margin-bottom:6px; line-height:1.25; }
+  h2{ font-size:16px; color:var(--teal-d); margin:18px 0 8px; }
+  p{ font-size:14px; line-height:1.6; color:#33474a; margin-bottom:10px; }
+  .lead{ font-size:15px; color:var(--muted); }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; }
+  .hero{ background:#fff; border-radius:16px; padding:18px; border:1px solid var(--line); text-align:center; margin-bottom:14px; }
+  .hero .slogan{ font-size:18px; color:var(--teal-d); font-weight:600; margin-bottom:6px; }
+  .stats{ display:flex; gap:8px; margin:12px 0; }
+  .stat{ flex:1; background:var(--teal-l); border-radius:12px; padding:10px 6px; text-align:center; }
+  .stat b{ display:block; font-size:19px; color:var(--teal-d); }
+  .stat span{ font-size:10.5px; color:var(--muted); }
+  ul.svc{ list-style:none; }
+  ul.svc li{ font-size:14px; padding:9px 0 9px 24px; border-bottom:1px solid var(--line); position:relative; }
+  ul.svc li:last-child{ border-bottom:none; }
+  ul.svc li::before{ content:"✓"; position:absolute; left:2px; color:var(--teal); font-weight:700; }
+  .equip{ font-size:12.5px; color:var(--muted); line-height:1.7; }
+  .doc{ display:flex; gap:12px; align-items:flex-start; }
+  .doc .ava{ width:46px; height:46px; border-radius:50%; flex-shrink:0; color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:600; font-size:16px;
+    background:linear-gradient(135deg,var(--teal),var(--teal-d)); }
+  .doc .role{ font-size:12.5px; color:var(--muted); }
+  .doc .exp{ font-size:12px; color:var(--teal-d); margin-top:2px; }
+  .doc .bio{ font-size:12.5px; color:#3a4d50; margin-top:6px; line-height:1.55; }
+  .imgph{ position:relative; width:100%; border-radius:14px; overflow:hidden;
+    background:repeating-linear-gradient(135deg,#eef4f4 0 12px,#e6eeef 12px 24px);
+    border:1px solid var(--line); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; color:var(--teal-d);
+    padding:14px; margin-bottom:6px; }
+  .imgph.r169{ aspect-ratio:16/9; }
+  .imgph.r43{ aspect-ratio:4/3; }
+  .imgph .cam{ font-size:26px; opacity:.6; margin-bottom:4px; }
+  .imgph .id{ font-size:10px; font-weight:700; letter-spacing:.5px; background:var(--teal);
+    color:#fff; padding:2px 7px; border-radius:20px; margin-bottom:5px; }
+  .imgph .desc{ font-size:11px; line-height:1.4; color:var(--muted); max-width:90%; }
+  .cap{ font-size:11px; color:var(--muted); text-align:center; margin:0 0 12px; font-style:italic; }
+  .imgph.ava{ width:78px; aspect-ratio:1/1; flex-shrink:0; padding:6px; margin-bottom:0; border-radius:12px; }
+  .imgph.ava .cam{ font-size:18px; margin-bottom:2px; }
+  .imgph.ava .id{ font-size:7.5px; padding:1px 5px; margin-bottom:0; line-height:1.2; }
+  .tbl{ width:100%; border-collapse:collapse; font-size:11.5px; background:#fff; border-radius:12px; overflow:hidden; }
+  .tbl th,.tbl td{ border:1px solid var(--line); padding:6px 5px; text-align:center; }
+  .tbl th{ background:var(--teal); color:#fff; font-weight:600; }
+  .tbl td.name{ text-align:left; font-weight:600; color:var(--teal-d); white-space:nowrap; }
+  .tbl td.off{ color:#b9c6c8; }
+  .kv{ display:flex; gap:8px; font-size:14px; padding:9px 0; border-bottom:1px solid var(--line); }
+  .kv:last-child{ border-bottom:none; }
+  .kv .k{ color:var(--muted); width:96px; flex-shrink:0; }
+  .kv .v{ color:var(--ink); font-weight:500; }
+  .cta{ display:block; text-align:center; background:var(--teal); color:#fff; text-decoration:none;
+    padding:13px; border-radius:12px; font-weight:600; font-size:15px; margin-top:14px; }
+  .foot{ background:var(--teal-d); color:#bfe3e6; font-size:11px; padding:16px; line-height:1.7; margin-top:auto; }
+  .foot b{ color:#fff; }
+</style>
+</head>
+<body>
+<div class="site">
+
+  <div class="site-head">
+    <div class="brand">
+      <div class="eye"></div>
+      <div>
+        <b>Pro<span>Зрение</span></b>
+        <small>Офтальмологическая клиника · Новоград</small>
+      </div>
+    </div>
+  </div>
+
+  <nav class="menu" id="menu">
+    <button data-p="home" class="on" onclick="go('home')">Главная</button>
+    <button data-p="about" onclick="go('about')">О клинике</button>
+    <button data-p="services" onclick="go('services')">Услуги</button>
+    <button data-p="docs" onclick="go('docs')">Врачи</button>
+    <button data-p="schedule" onclick="go('schedule')">Расписание</button>
+    <button data-p="contacts" onclick="go('contacts')">Контакты</button>
+  </nav>
+
+  <section class="page on" id="home">
+    <div class="imgph r169">
+      <div class="cam">📷</div>
+      <div class="id">IMG-CLINIC-01</div>
+      <div class="desc">Светлая зона регистратуры современной глазной клиники</div>
+    </div>
+    <div class="hero">
+      <div class="slogan">«Заботимся о вашем зрении»</div>
+      <p class="lead">Диагностика, лечение и хирургия глаз для взрослых и детей.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>2008</b><span>работаем с года</span></div>
+      <div class="stat"><b>4</b><span>врача-специалиста</span></div>
+      <div class="stat"><b>12 000+</b><span>пациентов</span></div>
+    </div>
+    <div class="card">
+      <h2>Запись на приём</h2>
+      <p>Приём по предварительной записи. Регистратура работает Пн–Пт с 09:00 до 20:00.</p>
+      <div class="kv"><span class="k">Адрес</span><span class="v">Новоград, ул. Проф. Кравцова, 14, к. 2</span></div>
+      <a class="cta" href="tel:+78315550417">📞 +7 (831) 555-04-17</a>
+    </div>
+  </section>
+
+  <section class="page" id="about">
+    <h1>О клинике</h1>
+    <p>Клиника «ProЗрение» работает в Новограде с 2008 года и оказывает полный спектр офтальмологической помощи — от диагностики до микрохирургии глаза.</p>
+    <div class="imgph r43">
+      <div class="cam">📷</div>
+      <div class="id">IMG-CLINIC-03</div>
+      <div class="desc">Кабинет диагностики: щелевая лампа, ОКТ</div>
+    </div>
+    <p class="cap">Кабинет диагностики зрения</p>
+    <div class="stats">
+      <div class="stat"><b>17</b><span>лет практики</span></div>
+      <div class="stat"><b>4</b><span>врача (к.м.н., высшая кат.)</span></div>
+      <div class="stat"><b>12 000+</b><span>пациентов</span></div>
+    </div>
+    <div class="card">
+      <h2>Оборудование</h2>
+      <p class="equip">Щелевая лампа Carl Zeiss SL 130 · ОКТ Optopol REVO NX · авторефкератометр Topcon · периметр Humphrey · факоэмульсификатор Alcon Centurion.</p>
+    </div>
+    <div class="imgph r43">
+      <div class="cam">📷</div>
+      <div class="id">IMG-CLINIC-04</div>
+      <div class="desc">Операционная: микрохирургия глаза</div>
+    </div>
+    <p class="cap">Операционная микрохирургии глаза</p>
+    <div class="card">
+      <h2>Лицензия</h2>
+      <p>Медицинская деятельность — лицензия <b>ЛО-52-01-009482</b>.</p>
+    </div>
+  </section>
+
+  <section class="page" id="services">
+    <h1>Услуги</h1>
+    <div class="card">
+      <ul class="svc">
+        <li>Диагностика зрения (визометрия, тонометрия, периметрия, ОКТ)</li>
+        <li>Лечение катаракты (факоэмульсификация + ИОЛ)</li>
+        <li>Лечение глаукомы</li>
+        <li>Лазерная коррекция зрения (LASIK, Femto-LASIK)</li>
+        <li>Детская офтальмология</li>
+        <li>Подбор очков и контактных линз</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="page" id="docs">
+    <h1>Наши врачи</h1>
+
+    <div class="card">
+      <div class="doc">
+        <div class="imgph ava"><div class="cam">📷</div><div class="id">DOC-NATALIA</div></div>
+        <div>
+          <b>Иванова Наталья Сергеевна</b>
+          <div class="role">Главный врач, офтальмолог-хирург высшей категории</div>
+          <div class="exp">Стаж 24 года</div>
+          <div class="bio">Руководит клиникой, ведёт хирургию катаракты и глаукомы.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="doc">
+        <div class="imgph ava"><div class="cam">📷</div><div class="id">DOC-VICTOR</div></div>
+        <div>
+          <b>Иванов Виктор Игоревич</b>
+          <div class="role">Врач-офтальмолог, лазерный хирург</div>
+          <div class="exp">Стаж 16 лет</div>
+          <div class="bio">Образование: Приволжский государственный медицинский университет, 2009. Курсы лазерной коррекции — 2014. Проводит LASIK / Femto-LASIK, ведёт детей старше 12 лет.</div>
+        </div>
+      </div>
+      <div class="imgph r169" style="margin-top:10px;">
+        <div class="cam">📷</div>
+        <div class="id">IMG-VICTOR-OFFICE</div>
+        <div class="desc">Кабинет врача; на фоне — аквариум с рыбками</div>
+      </div>
+      <p class="cap">Кабинет приёма</p>
+    </div>
+
+    <div class="card">
+      <div class="doc">
+        <div class="imgph ava"><div class="cam">📷</div><div class="id">DOC-PETROVA</div></div>
+        <div>
+          <b>Петрова Ольга Дмитриевна</b>
+          <div class="role">Детский офтальмолог</div>
+          <div class="exp">Стаж 11 лет</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="doc">
+        <div class="imgph ava"><div class="cam">📷</div><div class="id">DOC-KAZARYAN</div></div>
+        <div>
+          <b>Казарян Армен Левонович</b>
+          <div class="role">Специалист по сетчатке, ОКТ-диагностика</div>
+          <div class="exp">Стаж 19 лет</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="schedule">
+    <h1>Расписание приёма</h1>
+    <p class="lead">Запись по телефону регистратуры.</p>
+    <div style="overflow-x:auto; margin-top:10px;">
+      <table class="tbl">
+        <tr><th>Врач</th><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th></tr>
+        <tr><td class="name">Иванова Н.</td><td>10–15</td><td class="off">—</td><td>10–15</td><td class="off">—</td><td>10–15</td><td class="off">—</td><td class="off">—</td></tr>
+        <tr><td class="name">Иванов В.</td><td class="off">—</td><td>12–19</td><td class="off">—</td><td>12–19</td><td class="off">—</td><td>10–14</td><td class="off">—</td></tr>
+        <tr><td class="name">Петрова О.</td><td>09–14</td><td>09–14</td><td class="off">—</td><td>09–14</td><td class="off">—</td><td class="off">—</td><td class="off">—</td></tr>
+        <tr><td class="name">Казарян А.</td><td class="off">—</td><td class="off">—</td><td>14–20</td><td class="off">—</td><td>14–20</td><td class="off">—</td><td class="off">—</td></tr>
+      </table>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <h2>Как записаться</h2>
+      <p>Приём только по предварительной записи. Позвоните в регистратуру или уточните свободное время у администратора.</p>
+      <a class="cta" href="tel:+78315550417">📞 Записаться: +7 (831) 555-04-17</a>
+    </div>
+  </section>
+
+  <section class="page" id="contacts">
+    <h1>Контакты</h1>
+    <div class="imgph r43">
+      <div class="cam">📷</div>
+      <div class="id">IMG-CLINIC-02</div>
+      <div class="desc">Фасад клиники, вывеска, вход</div>
+    </div>
+    <p class="cap">Как нас найти</p>
+    <div class="card">
+      <div class="kv"><span class="k">Адрес</span><span class="v">г. Новоград, ул. Профессора Кравцова, д. 14, корп. 2</span></div>
+      <div class="kv"><span class="k">Регистратура</span><span class="v">+7 (831) 555-04-17<br>+7 (831) 555-04-18</span></div>
+      <div class="kv"><span class="k">Почта</span><span class="v">info@pro-zrenie.ru</span></div>
+      <div class="kv"><span class="k">Сайт</span><span class="v">www.pro-zrenie.ru</span></div>
+      <div class="kv"><span class="k">Часы работы</span><span class="v">Пн–Пт 09:00–20:00 · Сб 10:00–17:00 · Вс выходной</span></div>
+    </div>
+    <a class="cta" href="tel:+78315550417">📞 Позвонить в клинику</a>
+  </section>
+
+  <div class="foot">
+    <b>Клиника «ProЗрение»</b> · г. Новоград, ул. Профессора Кравцова, 14, к. 2<br>
+    Тел. +7 (831) 555-04-17 · info@pro-zrenie.ru · Лицензия ЛО-52-01-009482<br>
+    © 2008–2026. Имеются противопоказания, необходима консультация специалиста.
+  </div>
+
+</div>
+
+<script>
+  function go(id){
+    document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on', p.id===id));
+    document.querySelectorAll('#menu button').forEach(b=>b.classList.toggle('on', b.dataset.p===id));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+</script>
+</body>
+</html>

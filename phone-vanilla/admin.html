@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Админка — Эмулятор телефона</title>
+  <link rel="stylesheet" href="./admin-panel.css" />
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-topbar">
+      <div class="admin-topbar-left">
+        <h1>Админка эмулятора</h1>
+        <p>Редактирование контента телефона и Novagram</p>
+      </div>
+      <div class="admin-topbar-actions">
+        <label class="admin-select-wrap">
+          <span>Учётка</span>
+          <select id="accountSelect"></select>
+        </label>
+        <button type="button" class="admin-btn" id="refreshPreviewBtn">Обновить превью</button>
+        <button type="button" class="admin-btn" id="exportBtn">Экспорт JSON</button>
+        <label class="admin-btn admin-btn-file">
+          Импорт JSON
+          <input type="file" id="importInput" accept="application/json" hidden />
+        </label>
+        <a class="admin-btn" href="./novogram-admin.html">Novogram Admin</a>
+        <a class="admin-btn admin-btn-primary" href="./index.html" target="_blank">Открыть телефон</a>
+      </div>
+    </header>
+
+    <div class="admin-state-bar">
+      <span class="admin-state-label">Состояние игры:</span>
+      <div class="admin-state-tabs">
+        <button type="button" class="admin-state-tab" data-story-state="1">1-е · 21 февраля</button>
+        <button type="button" class="admin-state-tab" data-story-state="2">2-е · 23 марта</button>
+      </div>
+      <button type="button" class="admin-btn admin-btn-danger" id="storyResetBtn">Сброс игры</button>
+      <span class="admin-state-hint">Управляет датой, календарём и лентой Novogram в превью и приложении</span>
+    </div>
+
+    <div class="admin-layout">
+      <aside class="admin-sidebar" id="sidebar"></aside>
+
+      <main class="admin-main">
+        <div class="admin-toolbar" id="toolbar"></div>
+        <div class="admin-content" id="content"></div>
+      </main>
+
+      <section class="admin-preview">
+        <div class="admin-preview-head">
+          <strong>Превью телефона</strong>
+          <span id="previewStatus">—</span>
+        </div>
+        <iframe id="phonePreview" src="./index.html" title="Эмулятор телефона"></iframe>
+      </section>
+    </div>
+  </div>
+
+  <div class="admin-toast" id="toast" hidden></div>
+
+  <script src="./story-state.js"></script>
+  <script src="./characters-data.js"></script>
+  <script src="./gibdd-data.js"></script>
+  <script src="./accounts.js"></script>
+  <script src="./admin-store.js"></script>
+  <script src="./novogram-data.js"></script>
+  <script src="./novogram-prepared.js"></script>
+  <script src="./novogram-prepared-chapter2.js"></script>
+  <script src="./novogram-photo-fingerprints.js"></script>
+  <script src="./novogram-filler.js"></script>
+  <script src="./browser-data.js"></script>
+  <script src="./admin-panel.js"></script>
+</body>
+</html>

@@ -24,11 +24,20 @@ ios/DymNadLdom/www/
 *.xcuserstate
 **/xcuserdata/
 
+# Побочные iOS-проекты — только исходники, без DerivedData/сборок
+ios-burgundy/build*/
+ios-burgundy/ipa-payload/
+ios-burgundy/*.app/
+ios-burgundy/*.zip
+ios-watergate/build*/
+ios-watergate/**/*.app/
+
 # Сборки
 *.apk
 *.aab
 *.ipa
 DymNadLdom-Simulator.app/
+*.xcarchive/
 
 # Утилиты (не часть проекта)
 rclone-*

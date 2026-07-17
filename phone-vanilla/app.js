@@ -26,16 +26,13 @@ function updateTime() {
   const minutes = now.getMinutes().toString().padStart(2, '0');
   const timeStr = `${hours}:${minutes}`;
 
-  const statusTime = document.getElementById('statusTime');
-  if (statusTime) statusTime.textContent = timeStr;
-
   const lockTime = document.getElementById('lockTime');
   if (lockTime) lockTime.textContent = timeStr;
 
   const lockDate = document.getElementById('lockDate');
   if (lockDate) {
-    // Неизменная дата сюжета — 21 февраля
-    const lockDay = new Date(2026, 1, 21);
+    // Дата сюжета зависит от текущего состояния (21 февраля / 23 марта).
+    const lockDay = window.StoryState ? StoryState.getDateObj() : new Date(2026, 1, 21);
     lockDate.textContent = lockDay.toLocaleDateString('ru-RU', {
       weekday: 'long',
       day: 'numeric',
@@ -45,18 +42,26 @@ function updateTime() {
 }
 
 function isMobile() {
-  return window.matchMedia('(max-width: 768px), (hover: none) and (pointer: coarse)').matches;
+  return window.matchMedia('(max-width: 768px), (hover: none) and (pointer: coarse)').matches
+    || document.body.classList.contains('native-shell');
 }
 
 function setupMobile() {
-  if (!isMobile()) return;
+  const mobile = isMobile();
+  if (mobile) document.body.classList.add('is-mobile');
+  if (!mobile) return;
 
-  document.documentElement.style.height = `${window.innerHeight}px`;
+  const setAppHeight = () => {
+    const h = Math.round(window.visualViewport?.height || window.innerHeight);
+    document.documentElement.style.setProperty('--app-height', `${h}px`);
+    document.documentElement.style.height = `${h}px`;
+    document.body.style.height = `${h}px`;
+  };
 
-  window.addEventListener('resize', () => {
-    document.documentElement.style.height = `${window.innerHeight}px`;
-  });
-
+  setAppHeight();
+  window.addEventListener('resize', setAppHeight);
+  window.visualViewport?.addEventListener('resize', setAppHeight);
+  window.visualViewport?.addEventListener('scroll', setAppHeight);
   document.addEventListener('gesturestart', e => e.preventDefault());
 }
 
@@ -85,7 +90,7 @@ function showScreen(screenId) {
 const APP_SCREENS = [
   'messagesApp', 'chatDetail', 'callsApp', 'mailApp', 'mailDetail',
   'gamesApp', 'snakeGame', 'webApp', 'gibddApp', 'gibddAdminApp', 'adminApp',
-  'hintsApp', 'notesApp', 'photosApp', 'calendarApp', 'mapsApp',
+  'hintsApp', 'notesApp', 'photosApp', 'calendarApp', 'mapsApp', 'browserApp', 'novogramApp',
 ];
 
 function openApp(app) {
@@ -105,6 +110,10 @@ function openApp(app) {
     HintsApp.open();
     return;
   }
+  if (app === 'browser') {
+    if (window.BrowserApp) BrowserApp.open();
+    return;
+  }
   if (app === 'mail') {
     const mail = window.PHONE_WEB_URLS?.mail;
     if (mail) {
@@ -113,9 +122,8 @@ function openApp(app) {
     }
   }
   if (app === 'novagram') {
-    const novagram = window.PHONE_WEB_URLS?.novagram;
-    if (novagram) {
-      openWebApp(novagram.url, novagram.title);
+    if (window.NovogramApp) {
+      NovogramApp.open();
       return;
     }
   }
@@ -143,7 +151,10 @@ function openApp(app) {
   if (app === 'snake') initSnake();
   if (app === 'notes') renderNotesApp();
   if (app === 'photos') renderPhotosApp();
-  if (app === 'calendar') renderCalendarApp();
+  if (app === 'calendar') {
+    calendarCursor = null;
+    renderCalendarApp();
+  }
   if (app === 'maps') renderMapsApp();
 }
 
@@ -671,45 +682,138 @@ function renderPhotosApp() {
   bindSimpleBack(screen);
 }
 
+let calendarCursor = null; // { year, month } — месяц, который сейчас смотрит игрок
+
+function getStoryDateParts() {
+  return window.StoryState ? StoryState.getDateParts() : { year: 2026, month: 1, day: 21 };
+}
+
+function shiftCalendarMonth(delta) {
+  if (!calendarCursor) {
+    const s = getStoryDateParts();
+    calendarCursor = { year: s.year, month: s.month };
+  }
+  let month = calendarCursor.month + delta;
+  let year = calendarCursor.year;
+  while (month < 0) {
+    month += 12;
+    year -= 1;
+  }
+  while (month > 11) {
+    month -= 12;
+    year += 1;
+  }
+  calendarCursor = { year, month };
+  renderCalendarApp();
+}
+
 function renderCalendarApp() {
   const screen = document.getElementById('calendarApp');
   if (!screen) return;
 
-  const events = PhoneSession.calendar || [];
+  const story = getStoryDateParts();
+  if (!calendarCursor) {
+    calendarCursor = { year: story.year, month: story.month };
+  }
+
+  const view = calendarCursor;
+  const monthNames = [
+    'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь',
+  ];
+  const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  const weekdayFull = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+
+  const storyDate = new Date(story.year, story.month, story.day);
+  const firstDay = new Date(view.year, view.month, 1);
+  const lead = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = new Date(view.year, view.month + 1, 0).getDate();
+  const prevDays = new Date(view.year, view.month, 0).getDate();
+  const isStoryMonth = view.year === story.year && view.month === story.month;
+
+  const cells = [];
+  for (let i = 0; i < lead; i++) {
+    const d = prevDays - lead + i + 1;
+    cells.push(`<div class="cal-cell muted"><span>${d}</span></div>`);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = isStoryMonth && d === story.day ? ' today' : '';
+    cells.push(`<div class="cal-cell${isToday}"><span>${d}</span></div>`);
+  }
+  const trail = (7 - ((lead + daysInMonth) % 7)) % 7;
+  for (let d = 1; d <= trail; d++) {
+    cells.push(`<div class="cal-cell muted"><span>${d}</span></div>`);
+  }
+
   screen.innerHTML = `
-    ${simpleAppHeader('Календарь')}
-    <div class="simple-app-body">
-      ${events.length ? events.map(ev => `
-        <div class="calendar-event">
-          <div class="calendar-date">${escHtml(ev.date)}</div>
-          <div class="calendar-info">
-            <h3>${escHtml(ev.title)}</h3>
-            <p>${escHtml(ev.time)}</p>
-          </div>
+    <div class="app-header cal-header">
+      <button class="back-btn" data-simple-back="home" type="button" aria-label="Назад">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+      </button>
+      <h1>Календарь</h1>
+    </div>
+    <div class="cal-app">
+      <div class="cal-hero">
+        <div class="cal-hero-weekday">${weekdayFull[storyDate.getDay()]}</div>
+        <div class="cal-hero-day">${story.day}</div>
+        <div class="cal-hero-month">${monthNames[story.month]} ${story.year}</div>
+      </div>
+      <div class="cal-sheet" id="calSheet">
+        <div class="cal-month-bar">
+          <button type="button" class="cal-nav-btn" data-cal-nav="-1" aria-label="Предыдущий месяц">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          </button>
+          <div class="cal-month-title">${monthNames[view.month]} ${view.year}</div>
+          <button type="button" class="cal-nav-btn" data-cal-nav="1" aria-label="Следующий месяц">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+          </button>
         </div>
-      `).join('') : '<p class="simple-empty">Нет событий</p>'}
+        <div class="cal-grid cal-weekdays">
+          ${weekDays.map(w => `<div class="cal-weekday">${w}</div>`).join('')}
+        </div>
+        <div class="cal-grid cal-days">
+          ${cells.join('')}
+        </div>
+        <p class="cal-swipe-hint">Листайте в стороны или нажимайте стрелки</p>
+      </div>
     </div>
   `;
   bindSimpleBack(screen);
+
+  screen.querySelectorAll('[data-cal-nav]').forEach(btn => {
+    btn.addEventListener('click', () => shiftCalendarMonth(Number(btn.dataset.calNav)));
+  });
+
+  const sheet = screen.querySelector('#calSheet');
+  if (sheet) {
+    let startX = 0;
+    let startY = 0;
+    sheet.addEventListener('touchstart', e => {
+      const t = e.changedTouches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+    }, { passive: true });
+    sheet.addEventListener('touchend', e => {
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
+      shiftCalendarMonth(dx < 0 ? 1 : -1);
+    }, { passive: true });
+  }
 }
 
 function renderMapsApp() {
   if (window.MapsApp) {
-    const notes = PhoneSession?.notes || [];
-    const kapnos = notes.find(n => /строител|парковк/i.test(`${n.title} ${n.body}`));
-    MapsApp.open({
-      to: kapnos ? 'stroyitely' : null,
-      query: kapnos ? 'строител' : '',
-    });
+    MapsApp.open();
     return;
   }
   const screen = document.getElementById('mapsApp');
   if (!screen) return;
   screen.innerHTML = `
-    ${simpleAppHeader('Карты')}
-    <div class="maps-view">
-      <div class="maps-pin">📍</div>
-      <p class="maps-label">Карта недоступна</p>
+    ${simpleAppHeader('Навигатор')}
+    <div class="maps-simple-body">
+      <p class="simple-empty">Навигатор недоступен</p>
     </div>
   `;
   bindSimpleBack(screen);
@@ -807,13 +911,88 @@ function setupHomeIndicators() {
   });
 }
 
+/** Полноэкранное сюжетное сообщение. opts: { icon, okLabel, cancelLabel, onCancel } */
+function showStoryMessage(text, onConfirm, opts = {}) {
+  document.getElementById('storyOverlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'storyOverlay';
+  overlay.className = 'story-overlay';
+  const cancelBtn = opts.cancelLabel
+    ? `<button type="button" class="story-overlay-cancel" id="storyOverlayCancel">${escHtml(opts.cancelLabel)}</button>`
+    : '';
+  overlay.innerHTML = `
+    <div class="story-overlay-card">
+      <div class="story-overlay-icon" aria-hidden="true">${opts.icon || '✉️'}</div>
+      <p class="story-overlay-text">${escHtml(text)}</p>
+      <div class="story-overlay-buttons">
+        <button type="button" class="story-overlay-ok" id="storyOverlayOk">${escHtml(opts.okLabel || 'OK')}</button>
+        ${cancelBtn}
+      </div>
+    </div>
+  `;
+  document.getElementById('iphone')?.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('show'));
+  const dismiss = () => {
+    overlay.classList.remove('show');
+    setTimeout(() => overlay.remove(), 220);
+  };
+  overlay.querySelector('#storyOverlayOk')?.addEventListener('click', () => {
+    dismiss();
+    if (typeof onConfirm === 'function') onConfirm();
+  });
+  overlay.querySelector('#storyOverlayCancel')?.addEventListener('click', () => {
+    dismiss();
+    if (typeof opts.onCancel === 'function') opts.onCancel();
+  });
+}
+
+function goToStoryState(n) {
+  if (window.StoryState) StoryState.setState(n);
+  updateTime();
+  if (window.PhoneSession) {
+    try { PhoneSession.renderHome(); } catch {}
+  }
+  showScreen('homeScreen');
+}
+
+function bindStoryReset() {
+  const btn = document.getElementById('storyResetBtn');
+  if (!btn || btn.dataset.bound === '1') return;
+  btn.dataset.bound = '1';
+  btn.addEventListener('click', () => {
+    showStoryMessage(
+      'Сбросить игру? Телефон вернётся к вводу пароля и первому состоянию.',
+      () => {
+        if (window.StoryState) StoryState.reset();
+        else if (window.PhonePasscode) PhonePasscode.lockPhone();
+        updateTime();
+      },
+      { icon: '↺', okLabel: 'Сбросить', cancelLabel: 'Отмена' },
+    );
+  });
+}
+
+if (window.StoryState) {
+  StoryState.onChange(() => {
+    calendarCursor = null;
+    updateTime();
+    if (window.PhoneSession) {
+      try { PhoneSession.renderHome(); } catch {}
+    }
+    if (currentScreen === 'calendarApp') renderCalendarApp();
+  });
+}
+
 updateTime();
 setInterval(updateTime, 10000);
 setupMobile();
 bindStaticHandlers();
 setupHomeIndicators();
+bindStoryReset();
 
 window.openApp = openApp;
 window.showScreen = showScreen;
 window.setCurrentScreen = setCurrentScreen;
 window.stopSnake = stopSnake;
+window.showStoryMessage = showStoryMessage;
+window.goToStoryState = goToStoryState;

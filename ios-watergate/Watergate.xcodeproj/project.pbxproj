@@ -1,0 +1,361 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		W10000000000000000000001 /* WatergateApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000011 /* WatergateApp.swift */; };
+		W10000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000012 /* ContentView.swift */; };
+		W10000000000000000000003 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000013 /* HomeView.swift */; };
+		W10000000000000000000004 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000014 /* GameView.swift */; };
+		W10000000000000000000005 /* HandView.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000015 /* HandView.swift */; };
+		W10000000000000000000006 /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000016 /* BoardView.swift */; };
+		W10000000000000000000007 /* ResearchTrackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000017 /* ResearchTrackView.swift */; };
+		W10000000000000000000008 /* PassDeviceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000018 /* PassDeviceView.swift */; };
+		W10000000000000000000009 /* PromptSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000019 /* PromptSheet.swift */; };
+		W1000000000000000000000A /* GameTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = W1000000000000000000001A /* GameTypes.swift */; };
+		W1000000000000000000000B /* BoardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = W1000000000000000000001B /* BoardLayout.swift */; };
+		W1000000000000000000000C /* CardDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = W1000000000000000000001C /* CardDatabase.swift */; };
+		W1000000000000000000000D /* GameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = W1000000000000000000001D /* GameEngine.swift */; };
+		W1000000000000000000000E /* GameStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = W1000000000000000000001E /* GameStore.swift */; };
+		W1000000000000000000000F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = W1000000000000000000001F /* Theme.swift */; };
+		W10000000000000000000010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000020 /* Assets.xcassets */; };
+		W10000000000000000000024 /* CardImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000023 /* CardImageView.swift */; };
+		W10000000000000000000025 /* CardIllustrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000026 /* CardIllustrationView.swift */; };
+		W10000000000000000000027 /* WatergateBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000028 /* WatergateBackground.swift */; };
+		W10000000000000000000029 /* NetworkModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = W1000000000000000000002A /* NetworkModels.swift */; };
+		W1000000000000000000002B /* LocalMultiplayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = W1000000000000000000002C /* LocalMultiplayerService.swift */; };
+		W1000000000000000000002D /* LocalLobbyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = W1000000000000000000002E /* LocalLobbyView.swift */; };
+		W1000000000000000000002F /* ReactionResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000030 /* ReactionResolver.swift */; };
+		W10000000000000000000033 /* CardActionResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000034 /* CardActionResolver.swift */; };
+		W10000000000000000000035 /* RulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000036 /* RulesView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		W10000000000000000000011 /* WatergateApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatergateApp.swift; sourceTree = "<group>"; };
+		W10000000000000000000012 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		W10000000000000000000013 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		W10000000000000000000014 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
+		W10000000000000000000015 /* HandView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandView.swift; sourceTree = "<group>"; };
+		W10000000000000000000016 /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
+		W10000000000000000000017 /* ResearchTrackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchTrackView.swift; sourceTree = "<group>"; };
+		W10000000000000000000018 /* PassDeviceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassDeviceView.swift; sourceTree = "<group>"; };
+		W10000000000000000000019 /* PromptSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptSheet.swift; sourceTree = "<group>"; };
+		W1000000000000000000001A /* GameTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTypes.swift; sourceTree = "<group>"; };
+		W1000000000000000000001B /* BoardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardLayout.swift; sourceTree = "<group>"; };
+		W1000000000000000000001C /* CardDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDatabase.swift; sourceTree = "<group>"; };
+		W1000000000000000000001D /* GameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEngine.swift; sourceTree = "<group>"; };
+		W1000000000000000000001E /* GameStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStore.swift; sourceTree = "<group>"; };
+		W1000000000000000000001F /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		W10000000000000000000020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		W10000000000000000000021 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		W10000000000000000000022 /* Watergate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Watergate.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		W10000000000000000000023 /* CardImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardImageView.swift; sourceTree = "<group>"; };
+		W10000000000000000000026 /* CardIllustrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardIllustrationView.swift; sourceTree = "<group>"; };
+		W10000000000000000000028 /* WatergateBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatergateBackground.swift; sourceTree = "<group>"; };
+		W1000000000000000000002A /* NetworkModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkModels.swift; sourceTree = "<group>"; };
+		W1000000000000000000002C /* LocalMultiplayerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalMultiplayerService.swift; sourceTree = "<group>"; };
+		W1000000000000000000002E /* LocalLobbyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLobbyView.swift; sourceTree = "<group>"; };
+		W10000000000000000000030 /* ReactionResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionResolver.swift; sourceTree = "<group>"; };
+		W10000000000000000000034 /* CardActionResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardActionResolver.swift; sourceTree = "<group>"; };
+		W10000000000000000000036 /* RulesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		W10000000000000000000031 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		W10000000000000000000041 = {
+			isa = PBXGroup;
+			children = (
+				W10000000000000000000042 /* Watergate */,
+				W10000000000000000000043 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		W10000000000000000000042 /* Watergate */ = {
+			isa = PBXGroup;
+			children = (
+				W10000000000000000000011 /* WatergateApp.swift */,
+				W10000000000000000000044 /* Models */,
+				W10000000000000000000045 /* Views */,
+				W1000000000000000000001F /* Theme.swift */,
+				W10000000000000000000020 /* Assets.xcassets */,
+				W10000000000000000000021 /* Info.plist */,
+			);
+			path = Watergate;
+			sourceTree = "<group>";
+		};
+		W10000000000000000000043 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				W10000000000000000000022 /* Watergate.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		W10000000000000000000044 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				W1000000000000000000001A /* GameTypes.swift */,
+				W1000000000000000000001B /* BoardLayout.swift */,
+				W1000000000000000000001C /* CardDatabase.swift */,
+				W10000000000000000000034 /* CardActionResolver.swift */,
+				W1000000000000000000001D /* GameEngine.swift */,
+				W10000000000000000000030 /* ReactionResolver.swift */,
+				W1000000000000000000001E /* GameStore.swift */,
+				W1000000000000000000002A /* NetworkModels.swift */,
+				W1000000000000000000002C /* LocalMultiplayerService.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		W10000000000000000000045 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				W10000000000000000000012 /* ContentView.swift */,
+				W10000000000000000000013 /* HomeView.swift */,
+				W10000000000000000000014 /* GameView.swift */,
+				W10000000000000000000015 /* HandView.swift */,
+				W10000000000000000000016 /* BoardView.swift */,
+				W10000000000000000000017 /* ResearchTrackView.swift */,
+				W10000000000000000000018 /* PassDeviceView.swift */,
+				W10000000000000000000019 /* PromptSheet.swift */,
+				W10000000000000000000023 /* CardImageView.swift */,
+				W10000000000000000000026 /* CardIllustrationView.swift */,
+				W10000000000000000000028 /* WatergateBackground.swift */,
+				W1000000000000000000002E /* LocalLobbyView.swift */,
+				W10000000000000000000036 /* RulesView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		W10000000000000000000051 /* Watergate */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = W10000000000000000000062 /* Build configuration list for PBXNativeTarget "Watergate" */;
+			buildPhases = (
+				W10000000000000000000052 /* Sources */,
+				W10000000000000000000031 /* Frameworks */,
+				W10000000000000000000053 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Watergate;
+			productName = Watergate;
+			productReference = W10000000000000000000022 /* Watergate.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		W10000000000000000000061 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					W10000000000000000000051 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = W10000000000000000000071 /* Build configuration list for PBXProject "Watergate" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = ru;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				ru,
+				Base,
+			);
+			mainGroup = W10000000000000000000041;
+			productRefGroup = W10000000000000000000043 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				W10000000000000000000051 /* Watergate */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		W10000000000000000000053 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				W10000000000000000000010 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		W10000000000000000000052 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				W10000000000000000000001 /* WatergateApp.swift in Sources */,
+				W10000000000000000000002 /* ContentView.swift in Sources */,
+				W10000000000000000000003 /* HomeView.swift in Sources */,
+				W10000000000000000000004 /* GameView.swift in Sources */,
+				W10000000000000000000005 /* HandView.swift in Sources */,
+				W10000000000000000000006 /* BoardView.swift in Sources */,
+				W10000000000000000000007 /* ResearchTrackView.swift in Sources */,
+				W10000000000000000000008 /* PassDeviceView.swift in Sources */,
+				W10000000000000000000009 /* PromptSheet.swift in Sources */,
+				W1000000000000000000000A /* GameTypes.swift in Sources */,
+				W1000000000000000000000B /* BoardLayout.swift in Sources */,
+				W1000000000000000000000C /* CardDatabase.swift in Sources */,
+				W10000000000000000000033 /* CardActionResolver.swift in Sources */,
+				W1000000000000000000000D /* GameEngine.swift in Sources */,
+				W1000000000000000000002F /* ReactionResolver.swift in Sources */,
+				W1000000000000000000000E /* GameStore.swift in Sources */,
+				W1000000000000000000000F /* Theme.swift in Sources */,
+				W10000000000000000000024 /* CardImageView.swift in Sources */,
+				W10000000000000000000025 /* CardIllustrationView.swift in Sources */,
+				W10000000000000000000027 /* WatergateBackground.swift in Sources */,
+				W10000000000000000000029 /* NetworkModels.swift in Sources */,
+				W1000000000000000000002B /* LocalMultiplayerService.swift in Sources */,
+				W1000000000000000000002D /* LocalLobbyView.swift in Sources */,
+				W10000000000000000000035 /* RulesView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		W10000000000000000000081 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		W10000000000000000000082 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		W10000000000000000000083 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z6T356G592;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Watergate/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.watergate.game;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		W10000000000000000000084 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z6T356G592;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Watergate/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.watergate.game;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		W10000000000000000000062 /* Build configuration list for PBXNativeTarget "Watergate" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				W10000000000000000000083 /* Debug */,
+				W10000000000000000000084 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		W10000000000000000000071 /* Build configuration list for PBXProject "Watergate" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				W10000000000000000000081 /* Debug */,
+				W10000000000000000000082 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = W10000000000000000000061 /* Project object */;
+}

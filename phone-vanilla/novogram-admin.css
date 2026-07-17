@@ -1,0 +1,240 @@
+:root {
+  --bg: #0b0d12;
+  --panel: #13161d;
+  --panel-2: #1a1e28;
+  --line: #292e3a;
+  --text: #f4f5f7;
+  --muted: #9ba3b4;
+  --accent: #7c5cff;
+  --danger: #ef4444;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button, input, textarea, select { font: inherit; }
+
+.nga-header {
+  min-height: 76px;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: rgba(19, 22, 29, .96);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.nga-header h1, .nga-toolbar h2 { margin: 0; }
+.nga-header h1 { font-size: 20px; }
+.nga-header p, .nga-toolbar p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.nga-header-actions, .nga-toolbar-actions, .nga-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.nga-shell {
+  min-height: calc(100vh - 76px);
+  display: grid;
+  grid-template-columns: 210px minmax(420px, 1fr) minmax(360px, 440px);
+}
+
+.nga-sidebar {
+  padding: 14px 10px;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.nga-nav {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 11px 12px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.nga-nav.active, .nga-nav:hover { background: var(--panel-2); }
+.nga-nav b { color: var(--muted); font-size: 12px; }
+
+.nga-workspace { padding: 18px; min-width: 0; }
+
+.nga-state-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.nga-state-tab {
+  flex: 1;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  padding: 11px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.nga-state-tab.active {
+  background: var(--accent, #5b8cff);
+  color: #fff;
+  border-color: transparent;
+}
+
+.nga-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.nga-toolbar input {
+  min-width: 230px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 9px 11px;
+}
+
+.nga-list { display: grid; gap: 9px; }
+
+.nga-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--text);
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nga-item:hover, .nga-item.selected { border-color: var(--accent); }
+.nga-thumb { width: 64px; height: 64px; border-radius: 9px; object-fit: cover; background: #08090c; }
+.nga-avatar { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; }
+.nga-item-main { min-width: 0; }
+.nga-item-title { font-weight: 650; margin-bottom: 4px; }
+.nga-item-text { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nga-item-meta { color: var(--muted); font-size: 12px; text-align: right; }
+.nga-badge { display: inline-block; font-size: 10px; border-radius: 999px; padding: 2px 7px; margin-left: 5px; background: #28213f; color: #c4b5fd; }
+.nga-badge.hidden { color: #fecaca; background: #451a1a; }
+
+.nga-editor {
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  padding: 16px;
+  overflow: auto;
+  max-height: calc(100vh - 76px);
+  position: sticky;
+  top: 76px;
+}
+
+.nga-editor-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 14px; }
+.nga-editor-head h3 { margin: 0; font-size: 17px; }
+.nga-form { display: grid; gap: 11px; }
+.nga-field { display: grid; gap: 5px; }
+.nga-field label { color: var(--muted); font-size: 12px; }
+.nga-field input, .nga-field textarea, .nga-field select {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #0f1218;
+  color: var(--text);
+  border-radius: 9px;
+  padding: 9px 10px;
+}
+.nga-field textarea { min-height: 95px; resize: vertical; }
+.nga-check { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; }
+.nga-check input { width: auto; }
+
+.nga-preview {
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #08090c;
+  border: 1px solid var(--line);
+}
+
+.nga-btn {
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 9px;
+  padding: 8px 11px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.nga-btn:hover { border-color: #4a5264; }
+.nga-primary { background: var(--accent); border-color: transparent; }
+.nga-danger { color: #fecaca; border-color: #6b2525; }
+.nga-small { padding: 6px 8px; font-size: 12px; }
+
+.nga-comments { display: grid; gap: 8px; }
+.nga-comment-row { border: 1px solid var(--line); border-radius: 9px; padding: 9px; background: #0f1218; }
+.nga-comment-row textarea { min-height: 60px; }
+.nga-comment-grid { display: grid; grid-template-columns: 1fr 90px auto; gap: 6px; margin-top: 6px; }
+.nga-section-title { margin: 8px 0 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; }
+.nga-empty, .nga-empty-editor { color: var(--muted); text-align: center; padding: 36px 14px; }
+.nga-empty-editor { display: grid; gap: 5px; }
+
+.nga-toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: #1f2937;
+  border: 1px solid var(--line);
+  z-index: 100;
+}
+
+@media (max-width: 1100px) {
+  .nga-shell { grid-template-columns: 180px 1fr; }
+  .nga-editor {
+    position: fixed;
+    top: 76px;
+    right: 0;
+    bottom: 0;
+    width: min(440px, 94vw);
+    max-height: none;
+    z-index: 15;
+    box-shadow: -20px 0 50px rgba(0,0,0,.4);
+  }
+  .nga-editor:has(.nga-empty-editor) { display: none; }
+}
+
+@media (max-width: 720px) {
+  .nga-header { position: static; align-items: flex-start; }
+  .nga-header-actions { display: none; }
+  .nga-shell { grid-template-columns: 1fr; }
+  .nga-sidebar { display: flex; overflow: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+  .nga-nav { width: auto; min-width: 130px; }
+  .nga-toolbar { align-items: flex-start; }
+  .nga-toolbar-actions { display: grid; }
+  .nga-toolbar input { min-width: 0; width: 100%; }
+  .nga-item { grid-template-columns: 52px 1fr; }
+  .nga-thumb { width: 52px; height: 52px; }
+  .nga-item-meta { display: none; }
+}
