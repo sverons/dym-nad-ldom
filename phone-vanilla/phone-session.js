@@ -12,10 +12,45 @@
       const raw = localStorage.getItem(account.dataStorageKey);
       if (raw) {
         const parsed = JSON.parse(raw);
-        return { ...clone(account.defaultData), ...parsed };
+        return mergeAccountData(account.defaultData, parsed);
       }
     } catch {}
     return clone(account.defaultData);
+  }
+
+  function mergeAccountData(defaults, saved) {
+    const base = clone(defaults);
+    const data = { ...base, ...clone(saved) };
+    const defaultContacts = Array.isArray(base.contacts) ? base.contacts : [];
+    const savedContacts = Array.isArray(saved.contacts) ? saved.contacts : [];
+    const merged = [...savedContacts];
+    const ids = new Set(merged.map(c => c.id));
+    const names = new Set(merged.map(c => String(c.name || '').toLowerCase()));
+
+    defaultContacts.forEach(contact => {
+      const nameKey = String(contact.name || '').toLowerCase();
+      if (!ids.has(contact.id) && !names.has(nameKey)) {
+        merged.push(clone(contact));
+        ids.add(contact.id);
+        names.add(nameKey);
+      }
+    });
+
+    // Гарантируем адвоката Железнова в основной книге контактов
+    const hasZheleznov = merged.some(c => /железнов/i.test(String(c.name || '')));
+    if (!hasZheleznov) {
+      const fromDefaults = defaultContacts.find(c => /железнов/i.test(String(c.name || '')));
+      merged.unshift(clone(fromDefaults || {
+        id: 1,
+        name: 'Пётр Железнов',
+        avatar: 'Ж',
+        color: 'avatar-1',
+        phone: '+7 (903) 118-25-00',
+      }));
+    }
+
+    data.contacts = merged;
+    return data;
   }
 
   function saveData() {

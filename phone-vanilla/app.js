@@ -88,7 +88,7 @@ function showScreen(screenId) {
 }
 
 const APP_SCREENS = [
-  'messagesApp', 'chatDetail', 'callsApp', 'mailApp', 'mailDetail',
+  'messagesApp', 'contactsApp', 'chatDetail', 'callsApp', 'mailApp', 'mailDetail',
   'gamesApp', 'snakeGame', 'webApp', 'gibddApp', 'gibddAdminApp', 'adminApp',
   'hintsApp', 'notesApp', 'photosApp', 'calendarApp', 'mapsApp', 'browserApp', 'novogramApp',
 ];
@@ -134,7 +134,7 @@ function openApp(app) {
     mail: 'mailApp',
     games: 'gamesApp',
     snake: 'snakeGame',
-    contacts: 'messagesApp',
+    contacts: 'contactsApp',
     notes: 'notesApp',
     photos: 'photosApp',
     calendar: 'calendarApp',
@@ -145,7 +145,8 @@ function openApp(app) {
 
   showScreen(appMap[app]);
 
-  if (app === 'messages' || app === 'contacts') renderChatList();
+  if (app === 'messages') renderChatList();
+  if (app === 'contacts') renderContactsList();
   if (app === 'calls') { renderCallList(); initDialer(); }
   if (app === 'games') renderGames();
   if (app === 'snake') initSnake();
@@ -156,6 +157,36 @@ function openApp(app) {
     renderCalendarApp();
   }
   if (app === 'maps') renderMapsApp();
+}
+
+function renderContactsList() {
+  const list = document.getElementById('contactList');
+  if (!list) return;
+
+  const contacts = [...getContacts()].sort((a, b) =>
+    String(a.name || '').localeCompare(String(b.name || ''), 'ru')
+  );
+
+  if (!contacts.length) {
+    list.innerHTML = '<div class="empty-list">Нет контактов</div>';
+    return;
+  }
+
+  list.innerHTML = contacts.map(contact => `
+    <div class="chat-item contact-item" data-contact="${contact.id}">
+      <div class="chat-avatar ${escHtml(contact.color || 'avatar-1')}">${escHtml(contact.avatar || '?')}</div>
+      <div class="chat-info">
+        <div class="chat-name">${escHtml(contact.name)}</div>
+        <div class="chat-preview">${escHtml(contact.phone || '')}</div>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.contact-item').forEach(item => {
+    item.addEventListener('click', () => {
+      startCall(parseInt(item.dataset.contact, 10));
+    });
+  });
 }
 
 function renderChatList() {

@@ -672,6 +672,13 @@ body {
   overflow-y: auto;
 }
 
+.empty-list {
+  padding: 48px 24px;
+  text-align: center;
+  color: #8e8e93;
+  font-size: 15px;
+}
+
 .chat-item {
   display: flex;
   align-items: center;
